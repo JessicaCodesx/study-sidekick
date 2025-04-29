@@ -2,11 +2,22 @@ import { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { getAll, add, update, remove } from '../lib/db';
 import { AcademicRecord } from '../lib/types';
-import { generateId, getCurrentTimestamp, calculateGPA } from '../lib/utils';
+import { 
+  generateId, 
+  getCurrentTimestamp 
+} from '../lib/utils';
+import {
+  getGradeColor,
+  formatPercentage,
+  percentageToLetterGrade,
+  calculateGPAFromPercentages
+} from '../lib/gradeUtils';
 import Button from '../components/common/Button';
 import Card, { CardTitle, CardContent } from '../components/common/Card';
 import Modal, { ModalFooter } from '../components/common/Modal';
+import PercentageGradeInput from '../components/academic-records/PercentageGradeInput';
 import GPAChart from '../components/academic-records/GPAChart';
+import PageContainer from '../components/layout/PageContainer';
 
 const AcademicRecordsPage = () => {
   const { state, dispatch } = useAppContext();
@@ -20,6 +31,10 @@ const AcademicRecordsPage = () => {
   const [gpa, setGpa] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Form state for adding/editing records
+  const [newGradePercentage, setNewGradePercentage] = useState<number | undefined>(undefined);
+  const [newLetterGrade, setNewLetterGrade] = useState<string | undefined>(undefined);
 
   // Load academic records
   useEffect(() => {
@@ -59,20 +74,36 @@ const AcademicRecordsPage = () => {
   useEffect(() => {
     if (selectedTerm === 'all') {
       setFilteredRecords(records);
-      setGpa(calculateGPA(records));
+      setGpa(calculateGPAFromPercentages(records));
     } else {
       const filtered = records.filter(record => record.term === selectedTerm);
       setFilteredRecords(filtered);
-      setGpa(calculateGPA(filtered));
+      setGpa(calculateGPAFromPercentages(filtered));
     }
   }, [selectedTerm, records]);
+
+  // Reset form state when modals open/close
+  useEffect(() => {
+    if (isAddModalOpen) {
+      setNewGradePercentage(undefined);
+      setNewLetterGrade(undefined);
+    }
+  }, [isAddModalOpen]);
+
+  useEffect(() => {
+    if (isEditModalOpen && currentRecord) {
+      setNewGradePercentage(currentRecord.gradePercentage);
+      setNewLetterGrade(currentRecord.letterGrade);
+    }
+  }, [isEditModalOpen, currentRecord]);
 
   // Handle adding a new record
   const handleAddRecord = async (recordData: {
     name: string;
     term: string;
     credits: number;
-    grade?: string;
+    gradePercentage?: number;
+    letterGrade?: string;
     notes?: string;
   }) => {
     try {
@@ -114,7 +145,8 @@ const AcademicRecordsPage = () => {
     name: string;
     term: string;
     credits: number;
-    grade?: string;
+    gradePercentage?: number;
+    letterGrade?: string;
     notes?: string;
   }) => {
     if (!currentRecord) return;
@@ -189,19 +221,10 @@ const AcademicRecordsPage = () => {
     }
   };
 
-  // Get letter grade color
-  const getGradeColor = (grade: string | undefined) => {
-    if (!grade) return 'text-gray-600 dark:text-gray-400';
-    
-    const gradeValue = grade.toUpperCase();
-    
-    if (gradeValue.startsWith('A')) return 'text-green-600 dark:text-green-400';
-    if (gradeValue.startsWith('B')) return 'text-blue-600 dark:text-blue-400';
-    if (gradeValue.startsWith('C')) return 'text-yellow-600 dark:text-yellow-400';
-    if (gradeValue.startsWith('D')) return 'text-orange-600 dark:text-orange-400';
-    if (gradeValue.startsWith('F')) return 'text-red-600 dark:text-red-400';
-    
-    return 'text-gray-600 dark:text-gray-400';
+  // Handle grade change
+  const handleGradeChange = (percentage: number | undefined, letterGrade: string | undefined) => {
+    setNewGradePercentage(percentage);
+    setNewLetterGrade(letterGrade);
   };
 
   // Format GPA for display
@@ -210,11 +233,11 @@ const AcademicRecordsPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <PageContainer>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Academic Records</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-600">Academic Records</h1>
+          <p className="text-gray-600 dark:text-gray-400 theme-pink:text-pink-500">
             Track your courses, grades, and GPA
           </p>
         </div>
@@ -230,7 +253,7 @@ const AcademicRecordsPage = () => {
       </div>
       
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 rounded">
+        <div className="mb-4 p-3 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 rounded theme-pink:bg-pink-100 theme-pink:text-red-600">
           {error}
         </div>
       )}
@@ -241,27 +264,27 @@ const AcademicRecordsPage = () => {
           <CardTitle>GPA</CardTitle>
           <CardContent>
             <div className="text-center py-4">
-              <div className="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+              <div className="text-4xl font-bold text-primary-600 dark:text-primary-400 theme-pink:text-pink-500 mb-2">
                 {formatGPA(gpa)}
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400 theme-pink:text-pink-400">
                 {selectedTerm === 'all' ? 'Cumulative GPA' : `${selectedTerm} GPA`}
               </p>
               
               <div className="mt-6">
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">0.0</span>
-                  <span className="text-gray-600 dark:text-gray-400">4.0</span>
+                  <span className="text-gray-600 dark:text-gray-400 theme-pink:text-pink-400">0.0</span>
+                  <span className="text-gray-600 dark:text-gray-400 theme-pink:text-pink-400">4.0</span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 theme-pink:bg-pink-100 rounded-full h-2.5">
                   <div
-                    className="bg-primary-600 h-2.5 rounded-full"
+                    className="bg-primary-600 dark:bg-primary-500 theme-pink:bg-pink-400 h-2.5 rounded-full"
                     style={{ width: `${(gpa / 4) * 100}%` }}
                   ></div>
                 </div>
               </div>
               
-              <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+              <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 theme-pink:text-pink-400">
                 <p>Credits: {filteredRecords.reduce((sum, record) => sum + record.credits, 0)}</p>
                 <p>Courses: {filteredRecords.length}</p>
               </div>
@@ -272,15 +295,15 @@ const AcademicRecordsPage = () => {
         {/* Academic Records */}
         <div className="lg:col-span-3">
           <Card>
-            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex flex-wrap justify-between items-center">
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 theme-pink:border-pink-200 flex flex-wrap justify-between items-center">
               <CardTitle className="mb-0">Course History</CardTitle>
               
               <div className="flex items-center mt-2 md:mt-0">
-                <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">Term:</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400 theme-pink:text-pink-500 mr-2">Term:</span>
                 <select
                   value={selectedTerm}
                   onChange={(e) => setSelectedTerm(e.target.value)}
-                  className="rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm"
+                  className="rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 theme-pink:border-pink-300 theme-pink:bg-white shadow-sm focus:border-primary-500 focus:ring-primary-500 theme-pink:focus:border-pink-500 theme-pink:focus:ring-pink-500 text-sm"
                 >
                   <option value="all">All Terms</option>
                   {terms.map(term => (
@@ -295,14 +318,14 @@ const AcademicRecordsPage = () => {
             <CardContent>
               {isLoading && records.length === 0 ? (
                 <div className="text-center py-8">
-                  <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                  <p className="mt-2 text-gray-600 dark:text-gray-400">Loading records...</p>
+                  <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent theme-pink:border-pink-400 theme-pink:border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  <p className="mt-2 text-gray-600 dark:text-gray-400 theme-pink:text-pink-500">Loading records...</p>
                 </div>
               ) : filteredRecords.length === 0 ? (
                 <div className="text-center py-12">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-16 w-16 mx-auto text-gray-400"
+                    className="h-16 w-16 mx-auto text-gray-400 dark:text-gray-600 theme-pink:text-pink-300"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -314,10 +337,10 @@ const AcademicRecordsPage = () => {
                       d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                     />
                   </svg>
-                  <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+                  <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white theme-pink:text-pink-600">
                     No Course Records
                   </h3>
-                  <p className="mt-2 text-gray-600 dark:text-gray-400">
+                  <p className="mt-2 text-gray-600 dark:text-gray-400 theme-pink:text-pink-500">
                     {selectedTerm === 'all'
                       ? "You haven't added any course records yet."
                       : `No courses found for ${selectedTerm}.`}
@@ -332,52 +355,66 @@ const AcademicRecordsPage = () => {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 theme-pink:divide-pink-200">
+                    <thead className="bg-gray-50 dark:bg-gray-800 theme-pink:bg-pink-50">
                       <tr>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 theme-pink:text-pink-600 uppercase tracking-wider">
                           Course
                         </th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 theme-pink:text-pink-600 uppercase tracking-wider">
                           Term
                         </th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 theme-pink:text-pink-600 uppercase tracking-wider">
                           Credits
                         </th>
-                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 theme-pink:text-pink-600 uppercase tracking-wider">
                           Grade
                         </th>
-                        <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 theme-pink:text-pink-600 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody className="bg-white dark:bg-gray-800 theme-pink:bg-white divide-y divide-gray-200 dark:divide-gray-700 theme-pink:divide-pink-100">
                       {filteredRecords.map(record => (
-                        <tr key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <tr key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-50">
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white theme-pink:text-gray-800">
                               {record.name}
                             </div>
                             {record.notes && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xs truncate">
+                              <div className="text-xs text-gray-500 dark:text-gray-400 theme-pink:text-pink-500 mt-1 max-w-xs truncate">
                                 {record.notes}
                               </div>
                             )}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-white">
+                            <div className="text-sm text-gray-900 dark:text-white theme-pink:text-gray-800">
                               {record.term}
                             </div>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-white">
+                            <div className="text-sm text-gray-900 dark:text-white theme-pink:text-gray-800">
                               {record.credits}
                             </div>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <div className={`text-sm font-medium ${getGradeColor(record.grade)}`}>
-                              {record.grade || 'N/A'}
+                            <div className="flex flex-col">
+                              {record.gradePercentage !== undefined && (
+                                <span className="text-sm text-gray-600 dark:text-gray-400 theme-pink:text-gray-700">
+                                  {formatPercentage(record.gradePercentage)}
+                                </span>
+                              )}
+                              {record.letterGrade && (
+                                <span className={`text-sm font-medium ${getGradeColor(record.letterGrade)}`}>
+                                  {record.letterGrade}
+                                </span>
+                              )}
+                              {!record.gradePercentage && !record.letterGrade && (
+                                <span className="text-sm text-gray-500 dark:text-gray-400 theme-pink:text-gray-500">
+                                  N/A
+                                </span>
+                              )}
                             </div>
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
@@ -386,13 +423,13 @@ const AcademicRecordsPage = () => {
                                 setCurrentRecord(record);
                                 setIsEditModalOpen(true);
                               }}
-                              className="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 mr-3"
+                              className="text-primary-600 dark:text-primary-400 theme-pink:text-pink-500 hover:text-primary-800 dark:hover:text-primary-300 theme-pink:hover:text-pink-700 mr-3"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDeleteRecord(record.id)}
-                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                              className="text-red-600 dark:text-red-400 theme-pink:text-red-500 hover:text-red-800 dark:hover:text-red-300 theme-pink:hover:text-red-700"
                             >
                               Delete
                             </button>
@@ -424,32 +461,32 @@ const AcademicRecordsPage = () => {
       >
         <div className="space-y-4">
           <div>
-            <label htmlFor="courseName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="courseName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
               Course Name *
             </label>
             <input
               type="text"
               id="courseName"
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 theme-pink:border-pink-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 theme-pink:focus:border-pink-500 theme-pink:focus:ring-pink-500 sm:text-sm"
               placeholder="Introduction to Computer Science"
             />
           </div>
           
           <div>
-            <label htmlFor="courseTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="courseTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
               Term *
             </label>
             <input
               type="text"
               id="courseTerm"
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 theme-pink:border-pink-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 theme-pink:focus:border-pink-500 theme-pink:focus:ring-pink-500 sm:text-sm"
               placeholder="Fall 2024"
             />
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="courseCredits" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="courseCredits" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
                 Credits *
               </label>
               <input
@@ -458,44 +495,28 @@ const AcademicRecordsPage = () => {
                 min="0"
                 step="0.5"
                 defaultValue="3"
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 theme-pink:border-pink-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 theme-pink:focus:border-pink-500 theme-pink:focus:ring-pink-500 sm:text-sm"
               />
             </div>
             
             <div>
-              <label htmlFor="courseGrade" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Grade
+              <label htmlFor="courseGrade" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
+                Grade (%)
               </label>
-              <select
-                id="courseGrade"
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-              >
-                <option value="">Select Grade</option>
-                <option value="A+">A+</option>
-                <option value="A">A</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B">B</option>
-                <option value="B-">B-</option>
-                <option value="C+">C+</option>
-                <option value="C">C</option>
-                <option value="C-">C-</option>
-                <option value="D+">D+</option>
-                <option value="D">D</option>
-                <option value="D-">D-</option>
-                <option value="F">F</option>
-              </select>
+              <PercentageGradeInput 
+                onChange={handleGradeChange}
+              />
             </div>
           </div>
           
           <div>
-            <label htmlFor="courseNotes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="courseNotes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
               Notes (Optional)
             </label>
             <textarea
               id="courseNotes"
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 theme-pink:border-pink-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 theme-pink:focus:border-pink-500 theme-pink:focus:ring-pink-500 sm:text-sm"
               placeholder="Any comments or reflections about this course..."
             ></textarea>
           </div>
@@ -511,7 +532,6 @@ const AcademicRecordsPage = () => {
               const nameInput = document.getElementById('courseName') as HTMLInputElement;
               const termInput = document.getElementById('courseTerm') as HTMLInputElement;
               const creditsInput = document.getElementById('courseCredits') as HTMLInputElement;
-              const gradeSelect = document.getElementById('courseGrade') as HTMLSelectElement;
               const notesTextarea = document.getElementById('courseNotes') as HTMLTextAreaElement;
               
               if (
@@ -526,7 +546,8 @@ const AcademicRecordsPage = () => {
                   name: nameInput.value.trim(),
                   term: termInput.value.trim(),
                   credits: parseFloat(creditsInput.value),
-                  grade: gradeSelect.value || undefined,
+                  gradePercentage: newGradePercentage,
+                  letterGrade: newLetterGrade,
                   notes: notesTextarea.value.trim() || undefined,
                 });
               }
@@ -549,32 +570,32 @@ const AcademicRecordsPage = () => {
         {currentRecord && (
           <div className="space-y-4">
             <div>
-              <label htmlFor="editCourseName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="editCourseName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
                 Course Name *
               </label>
               <input
                 type="text"
                 id="editCourseName"
                 defaultValue={currentRecord.name}
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 theme-pink:border-pink-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 theme-pink:focus:border-pink-500 theme-pink:focus:ring-pink-500 sm:text-sm"
               />
             </div>
             
             <div>
-              <label htmlFor="editCourseTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="editCourseTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
                 Term *
               </label>
               <input
                 type="text"
                 id="editCourseTerm"
                 defaultValue={currentRecord.term}
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 theme-pink:border-pink-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 theme-pink:focus:border-pink-500 theme-pink:focus:ring-pink-500 sm:text-sm"
               />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="editCourseCredits" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="editCourseCredits" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
                   Credits *
                 </label>
                 <input
@@ -583,46 +604,30 @@ const AcademicRecordsPage = () => {
                   min="0"
                   step="0.5"
                   defaultValue={currentRecord.credits}
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 theme-pink:border-pink-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 theme-pink:focus:border-pink-500 theme-pink:focus:ring-pink-500 sm:text-sm"
                 />
               </div>
               
               <div>
-                <label htmlFor="editCourseGrade" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Grade
+                <label htmlFor="editCourseGrade" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
+                  Grade (%)
                 </label>
-                <select
-                  id="editCourseGrade"
-                  defaultValue={currentRecord.grade || ''}
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                >
-                  <option value="">Select Grade</option>
-                  <option value="A+">A+</option>
-                  <option value="A">A</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B">B</option>
-                  <option value="B-">B-</option>
-                  <option value="C+">C+</option>
-                  <option value="C">C</option>
-                  <option value="C-">C-</option>
-                  <option value="D+">D+</option>
-                  <option value="D">D</option>
-                  <option value="D-">D-</option>
-                  <option value="F">F</option>
-                </select>
+                <PercentageGradeInput 
+                  initialValue={currentRecord.gradePercentage}
+                  onChange={handleGradeChange}
+                />
               </div>
             </div>
             
             <div>
-              <label htmlFor="editCourseNotes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="editCourseNotes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 theme-pink:text-pink-700">
                 Notes (Optional)
               </label>
               <textarea
                 id="editCourseNotes"
                 rows={3}
                 defaultValue={currentRecord.notes || ''}
-                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 theme-pink:border-pink-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 theme-pink:focus:border-pink-500 theme-pink:focus:ring-pink-500 sm:text-sm"
               ></textarea>
             </div>
           </div>
@@ -644,7 +649,6 @@ const AcademicRecordsPage = () => {
               const nameInput = document.getElementById('editCourseName') as HTMLInputElement;
               const termInput = document.getElementById('editCourseTerm') as HTMLInputElement;
               const creditsInput = document.getElementById('editCourseCredits') as HTMLInputElement;
-              const gradeSelect = document.getElementById('editCourseGrade') as HTMLSelectElement;
               const notesTextarea = document.getElementById('editCourseNotes') as HTMLTextAreaElement;
               
               if (
@@ -659,7 +663,8 @@ const AcademicRecordsPage = () => {
                   name: nameInput.value.trim(),
                   term: termInput.value.trim(),
                   credits: parseFloat(creditsInput.value),
-                  grade: gradeSelect.value || undefined,
+                  gradePercentage: newGradePercentage,
+                  letterGrade: newLetterGrade,
                   notes: notesTextarea.value.trim() || undefined,
                 });
               }
@@ -669,7 +674,7 @@ const AcademicRecordsPage = () => {
           </Button>
         </ModalFooter>
       </Modal>
-    </div>
+    </PageContainer>
   );
 };
 

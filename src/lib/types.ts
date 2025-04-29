@@ -63,9 +63,10 @@ export interface Task extends BaseEntity {
 // Academic record (past course)
 export interface AcademicRecord extends BaseEntity {
   name: string;
-  term: string; // e.g., "Fall 2023"
+  term: string;
   credits: number;
-  grade?: string; // Letter grade or numerical
+  gradePercentage?: number;  // Store the percentage grade
+  letterGrade?: string;      // Store the auto-calculated letter grade
   notes?: string;
 }
 
