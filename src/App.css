@@ -1,0 +1,240 @@
+/* Reset box sizing for all elements */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Reset margin and padding, set base font */
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+    'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden; /* Prevent scrolling on the body */
+}
+
+/* Make sure the root element fills the viewport */
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  max-width: none; /* Remove any max-width constraints */
+  text-align: left; /* Reset text-align */
+}
+
+/* Pink theme styles */
+.theme-pink {
+  /* Base colors */
+  --pink-primary: #ec4899;
+  --pink-secondary: #f472b6;
+  --pink-accent: #d946ef;
+  --pink-light: #fdf2f8;
+  --pink-medium: #fce7f3;
+  --pink-dark: #831843;
+  --pink-text: #9d174d;
+  --pink-text-light: #db2777;
+}
+
+/* Apply pink theme to buttons */
+.theme-pink button.btn-primary,
+.theme-pink button[data-variant="primary"] {
+  background-color: var(--pink-primary);
+  color: white;
+  border-radius: 9999px;
+}
+
+.theme-pink button.btn-outline,
+.theme-pink button[data-variant="outline"] {
+  border-color: var(--pink-primary);
+  color: var(--pink-primary);
+  border-radius: 9999px;
+}
+
+/* Pink theme cards */
+.theme-pink .card {
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px -1px rgba(244, 114, 182, 0.2), 0 2px 6px -1px rgba(244, 114, 182, 0.15);
+  border: 1px solid rgba(244, 114, 182, 0.2);
+}
+
+/* Pink theme headers */
+.theme-pink h1,
+.theme-pink h2,
+.theme-pink h3,
+.theme-pink h4,
+.theme-pink h5,
+.theme-pink h6 {
+  color: var(--pink-primary);
+}
+
+/* Pink theme links */
+.theme-pink a {
+  color: var(--pink-primary);
+}
+
+.theme-pink a:hover {
+  color: var(--pink-secondary);
+}
+
+/* Pink theme navigation and sidebar */
+.theme-pink nav,
+.theme-pink aside {
+  background-color: white;
+  border-color: var(--pink-medium);
+}
+
+.theme-pink nav a.active,
+.theme-pink aside a.active {
+  background-color: var(--pink-medium);
+  color: var(--pink-primary);
+}
+
+/* Pink theme inputs */
+.theme-pink input,
+.theme-pink select,
+.theme-pink textarea {
+  border-radius: 0.75rem;
+  border-color: var(--pink-secondary);
+}
+
+.theme-pink input:focus,
+.theme-pink select:focus,
+.theme-pink textarea:focus {
+  border-color: var(--pink-primary);
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2);
+}
+
+/* Pink theme decorations */
+.theme-pink .emoji-decoration {
+  position: absolute;
+  opacity: 0.5;
+  font-size: 24px;
+  z-index: -1;
+}
+
+.theme-pink .emoji-decoration.top-right {
+  top: 20px;
+  right: 20px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.theme-pink .emoji-decoration.bottom-left {
+  bottom: 20px;
+  left: 20px;
+  animation: float 8s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a3a3a3;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Pink theme scrollbar */
+.theme-pink::-webkit-scrollbar-thumb {
+  background: var(--pink-secondary);
+  border-radius: 4px;
+}
+
+.theme-pink::-webkit-scrollbar-thumb:hover {
+  background: var(--pink-primary);
+}
+
+/* Set base styles for page content containers */
+.page-container {
+  padding: 1.5rem;
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Pink theme emoji decorations for page container */
+.theme-pink .page-container::before {
+  content: "🌸";
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 24px;
+  opacity: 0.5;
+  z-index: 0;
+}
+
+.theme-pink .page-container::after {
+  content: "💖";
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-size: 24px;
+  opacity: 0.5;
+  z-index: 0;
+}
+
+/* Media query for larger screens */
+@media (min-width: 1024px) {
+  .page-container {
+    padding: 2rem;
+  }
+}
+
+/* Animation for page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-exit {
+  opacity: 1;
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 300ms, transform 300ms;
+}
