@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Task } from '../../lib/types';
 import { formatDate, daysUntil } from '../../lib/utils';
 import { useAppContext } from '../../context/AppContext';
+import { formatPercentage, percentageToLetterGrade, getGradeColor } from '../../lib/gradeUtils';
 
 interface TaskSummaryProps {
   task: Task;
@@ -81,7 +82,7 @@ const TaskSummary = ({ task, onComplete }: TaskSummaryProps) => {
     
     return dueText;
   };
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -133,6 +134,11 @@ const TaskSummary = ({ task, onComplete }: TaskSummaryProps) => {
               }`}
             >
               {task.title}
+              {task.weight !== undefined && (
+                <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                  ({task.weight}% of grade)
+                </span>
+              )}
             </h4>
             <div className="ml-2 flex items-center">{getPriorityIndicator(task.priority)}</div>
           </div>
@@ -185,6 +191,17 @@ const TaskSummary = ({ task, onComplete }: TaskSummaryProps) => {
               </span>
             </span>
           </div>
+          
+          {/* Display grade if available */}
+          {task.status === 'completed' && task.grade !== undefined && (
+            <div className="mt-1 flex items-center text-sm">
+              <span className="text-gray-500 dark:text-gray-400 mr-2">Grade:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">{formatPercentage(task.grade)}</span>
+              <span className={`ml-1 text-xs font-medium ${getGradeColor(percentageToLetterGrade(task.grade))}`}>
+                ({percentageToLetterGrade(task.grade)})
+              </span>
+            </div>
+          )}
           
           {task.description && (
             <p

@@ -26,6 +26,14 @@ const CoursesPage = () => {
           dispatch({ type: 'SET_COURSES', payload: courses });
           dispatch({ type: 'SET_LOADING', payload: false });
         }
+        
+        // Also load tasks if not already loaded
+        if (state.tasks.length === 0) {
+          dispatch({ type: 'SET_LOADING', payload: true });
+          const tasks = await getAll('tasks');
+          dispatch({ type: 'SET_TASKS', payload: tasks });
+          dispatch({ type: 'SET_LOADING', payload: false });
+        }
       } catch (error) {
         console.error('Error loading courses:', error);
         dispatch({ type: 'SET_ERROR', payload: 'Failed to load courses' });
@@ -238,6 +246,7 @@ const CoursesPage = () => {
             <CourseCard
               key={course.id}
               course={course}
+              tasks={state.tasks}
               onEdit={() => handleEditCourse(course)}
               onArchive={() => handleToggleArchive(course)}
               onDelete={() => handleDeleteCourse(course.id)}

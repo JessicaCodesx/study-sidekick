@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import ThemeContext from './context/ThemeContext';
 import { initDB, getUserSettings } from './lib/db';
@@ -14,6 +14,7 @@ import AcademicRecordsPage from './pages/AcademicRecordsPage';
 import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import PageContainer from './components/layout/PageContainer';
+import CourseGradesPage from './pages/CourseGradesPage';
 import './App.css';
 
 function App() {
@@ -167,7 +168,7 @@ function App() {
   return (
     <ThemeContext.Provider value={{ darkMode, toggleTheme, theme, setTheme }}>
       <AppProvider>
-        <BrowserRouter>
+        <HashRouter>
           <div className={`h-screen w-screen flex flex-col 
             ${theme === 'pink' 
               ? 'bg-pink-50 text-pink-900' 
@@ -189,6 +190,7 @@ function App() {
                   <Route path="/courses" element={<CoursesPage />} />
                   <Route path="/courses/:courseId/notes" element={<NotesPage />} />
                   <Route path="/courses/:courseId/flashcards" element={<FlashcardsPage />} />
+                  <Route path="/courses/:courseId/grades" element={<CourseGradesPage />} />
                   <Route path="/calendar" element={<CalendarPage />} />
                   <Route path="/academic-records" element={<AcademicRecordsPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
@@ -197,7 +199,7 @@ function App() {
               </main>
             </div>
           </div>
-        </BrowserRouter>
+        </HashRouter>
       </AppProvider>
     </ThemeContext.Provider>
   );

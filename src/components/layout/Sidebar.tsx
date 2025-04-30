@@ -18,7 +18,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: -300, opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="w-64 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto flex-shrink-0"
+          className="w-64 h-full bg-white dark:bg-gray-800 theme-pink:bg-pink-50 border-r border-gray-200 dark:border-gray-700 theme-pink:border-pink-200 overflow-y-auto flex-shrink-0"
         >
           <nav className="p-4 h-full flex flex-col">
             <div className="flex-grow">
@@ -29,8 +29,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     className={({ isActive }) =>
                       `flex items-center py-2 px-3 rounded-lg ${
                         isActive
-                          ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          ? 'bg-purple-100 dark:bg-purple-900 theme-pink:bg-pink-200 text-purple-800 dark:text-purple-200 theme-pink:text-pink-700'
+                          : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }
                   >
@@ -58,8 +58,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     className={({ isActive }) =>
                       `flex items-center py-2 px-3 rounded-lg ${
                         isActive
-                          ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          ? 'bg-purple-100 dark:bg-purple-900 theme-pink:bg-pink-200 text-purple-800 dark:text-purple-200 theme-pink:text-pink-700'
+                          : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }
                   >
@@ -87,8 +87,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     className={({ isActive }) =>
                       `flex items-center py-2 px-3 rounded-lg ${
                         isActive
-                          ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          ? 'bg-purple-100 dark:bg-purple-900 theme-pink:bg-pink-200 text-purple-800 dark:text-purple-200 theme-pink:text-pink-700'
+                          : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }
                   >
@@ -116,8 +116,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     className={({ isActive }) =>
                       `flex items-center py-2 px-3 rounded-lg ${
                         isActive
-                          ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          ? 'bg-purple-100 dark:bg-purple-900 theme-pink:bg-pink-200 text-purple-800 dark:text-purple-200 theme-pink:text-pink-700'
+                          : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }
                   >
@@ -145,8 +145,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     className={({ isActive }) =>
                       `flex items-center py-2 px-3 rounded-lg ${
                         isActive
-                          ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          ? 'bg-purple-100 dark:bg-purple-900 theme-pink:bg-pink-200 text-purple-800 dark:text-purple-200 theme-pink:text-pink-700'
+                          : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }
                   >
@@ -178,7 +178,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
             
             {courses.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 theme-pink:text-pink-500 uppercase tracking-wider">
                   My Courses
                 </h3>
                 
@@ -188,18 +188,18 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     .map(course => (
                       <li key={course.id}>
                         <div className="px-3 py-2">
-                          <div className={`font-medium mb-1 ${course.colorTheme ? `text-course-${course.colorTheme}` : 'text-primary-600 dark:text-primary-400'}`}>
+                          <div className={`font-medium mb-1 ${course.colorTheme ? `text-course-${course.colorTheme}` : 'text-primary-600 dark:text-primary-400 theme-pink:text-pink-600'}`}>
                             {course.name}
                           </div>
                           
-                          <div className="flex space-x-1 text-sm">
+                          <div className="flex flex-wrap gap-1 text-sm">
                             <NavLink
                               to={`/courses/${course.id}/notes`}
                               className={({ isActive }) =>
                                 `px-2 py-1 rounded ${
                                   isActive
-                                    ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    ? 'bg-purple-100 dark:bg-purple-900 theme-pink:bg-pink-200 text-purple-800 dark:text-purple-200 theme-pink:text-pink-700'
+                                    : 'text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                                 }`
                               }
                             >
@@ -211,12 +211,26 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                               className={({ isActive }) =>
                                 `px-2 py-1 rounded ${
                                   isActive
-                                    ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    ? 'bg-purple-100 dark:bg-purple-900 theme-pink:bg-pink-200 text-purple-800 dark:text-purple-200 theme-pink:text-pink-700'
+                                    : 'text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                                 }`
                               }
                             >
                               Flashcards
+                            </NavLink>
+                            
+                            {/* Add Grades Link */}
+                            <NavLink
+                              to={`/courses/${course.id}/grades`}
+                              className={({ isActive }) =>
+                                `px-2 py-1 rounded ${
+                                  isActive
+                                    ? 'bg-purple-100 dark:bg-purple-900 theme-pink:bg-pink-200 text-purple-800 dark:text-purple-200 theme-pink:text-pink-700'
+                                    : 'text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
+                                }`
+                              }
+                            >
+                              Grades
                             </NavLink>
                           </div>
                         </div>

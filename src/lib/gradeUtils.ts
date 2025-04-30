@@ -1,40 +1,39 @@
 // Function to convert percentage grade to letter grade
 export function percentageToLetterGrade(percentage: number): string {
-    if (percentage >= 97) return 'A+';
-    if (percentage >= 93) return 'A';
-    if (percentage >= 90) return 'A-';
-    if (percentage >= 87) return 'B+';
-    if (percentage >= 83) return 'B';
-    if (percentage >= 80) return 'B-';
-    if (percentage >= 77) return 'C+';
-    if (percentage >= 73) return 'C';
-    if (percentage >= 70) return 'C-';
-    if (percentage >= 67) return 'D+';
-    if (percentage >= 63) return 'D';
-    if (percentage >= 60) return 'D-';
-    if (percentage >= 0) return 'F';
-    return '';
+  if (percentage >= 90) return 'A+';
+  if (percentage >= 85) return 'A';
+  if (percentage >= 80) return 'A-';
+  if (percentage >= 77) return 'B+';
+  if (percentage >= 73) return 'B';
+  if (percentage >= 70) return 'B-';
+  if (percentage >= 67) return 'C+';
+  if (percentage >= 63) return 'C';
+  if (percentage >= 60) return 'C-';
+  if (percentage >= 57) return 'D+';
+  if (percentage >= 53) return 'D';
+  if (percentage >= 50) return 'D-';
+  return 'F';
+}
+ // Convert letter grade to midpoint percentage
+export function letterGradeToPercentage(letterGrade: string): number {
+  switch (letterGrade.toUpperCase()) {
+    case 'A+': return 95;
+    case 'A': return 87;
+    case 'A-': return 82;
+    case 'B+': return 78;
+    case 'B': return 75;
+    case 'B-': return 71;
+    case 'C+': return 68;
+    case 'C': return 65;
+    case 'C-': return 61;
+    case 'D+': return 58;
+    case 'D': return 55;
+    case 'D-': return 51;
+    case 'F': return 25;
+    default: return NaN;
   }
-  
-  // Function to convert letter grade to percentage (midpoint of range)
-  export function letterGradeToPercentage(letterGrade: string): number {
-    switch (letterGrade) {
-      case 'A+': return 98.5; // 97-100
-      case 'A': return 95; // 93-96
-      case 'A-': return 91.5; // 90-92
-      case 'B+': return 88.5; // 87-89
-      case 'B': return 85; // 83-86
-      case 'B-': return 81.5; // 80-82
-      case 'C+': return 78.5; // 77-79
-      case 'C': return 75; // 73-76
-      case 'C-': return 71.5; // 70-72
-      case 'D+': return 68.5; // 67-69
-      case 'D': return 65; // 63-66
-      case 'D-': return 61.5; // 60-62
-      case 'F': return 50; // 0-59 (setting this to 50 as a default F)
-      default: return NaN;
-    }
-  }
+}
+
   
   // Function to get letter grade color
   export function getGradeColor(grade: string | number | undefined): string {
@@ -60,25 +59,25 @@ export function percentageToLetterGrade(percentage: number): string {
     return `${percentage.toFixed(1)}%`;
   }
   
-  // Function to get GPA points from letter grade
-  export function getGpaPoints(letterGrade: string): number {
-    switch (letterGrade) {
-      case 'A+': return 4.0;
-      case 'A': return 4.0;
-      case 'A-': return 3.7;
-      case 'B+': return 3.3;
-      case 'B': return 3.0;
-      case 'B-': return 2.7;
-      case 'C+': return 2.3;
-      case 'C': return 2.0;
-      case 'C-': return 1.7;
-      case 'D+': return 1.3;
-      case 'D': return 1.0;
-      case 'D-': return 0.7;
-      case 'F': return 0.0;
-      default: return NaN;
-    }
+ // Get GPA points from letter grade
+export function getGpaPoints(letterGrade: string): number {
+  switch (letterGrade.toUpperCase()) {
+    case 'A+': return 4.0;
+    case 'A': return 3.9;
+    case 'A-': return 3.7;
+    case 'B+': return 3.3;
+    case 'B': return 3.0;
+    case 'B-': return 2.7;
+    case 'C+': return 2.3;
+    case 'C': return 2.0;
+    case 'C-': return 1.7;
+    case 'D+': return 1.3;
+    case 'D': return 1.0;
+    case 'D-': return 0.7;
+    case 'F': return 0.0;
+    default: return NaN;
   }
+}
   
   // Function to calculate GPA from percentage grades
   export function calculateGPAFromPercentages(records: { credits: number, gradePercentage?: number }[]): number {

@@ -201,7 +201,6 @@ const CalendarPage = () => {
     return taskType ? taskType.color : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
   };
   
-  // Handle adding a new task
   const handleAddTask = async (taskData: {
     title: string;
     description: string;
@@ -210,6 +209,7 @@ const CalendarPage = () => {
     type: TaskType;
     courseId?: string;
     priority: number;
+    weight?: number;
   }) => {
     try {
       setIsLoading(true);
@@ -230,6 +230,7 @@ const CalendarPage = () => {
         courseId: taskData.courseId,
         status: 'pending',
         priority: taskData.priority,
+        weight: taskData.weight,
         createdAt: now,
         updatedAt: now,
       };
@@ -244,50 +245,51 @@ const CalendarPage = () => {
       setIsLoading(false);
     }
   };
-  
   // Handle updating a task
-  const handleUpdateTask = async (taskData: {
-    title: string;
-    description: string;
-    dueDate: string;
-    dueTime: string;
-    type: TaskType;
-    courseId?: string;
-    priority: number;
-  }) => {
-    if (!currentTask) return;
+const handleUpdateTask = async (taskData: {
+  title: string;
+  description: string;
+  dueDate: string;
+  dueTime: string;
+  type: TaskType;
+  courseId?: string;
+  priority: number;
+  weight?: number;
+}) => {
+  if (!currentTask) return;
+  
+  try {
+    setIsLoading(true);
     
-    try {
-      setIsLoading(true);
-      
-      // Parse date and time
-      const [year, month, day] = taskData.dueDate.split('-').map(Number);
-      const [hours, minutes] = taskData.dueTime.split(':').map(Number);
-      
-      const dueDate = new Date(year, month - 1, day, hours, minutes);
-      
-      const updatedTask: Task = {
-        ...currentTask,
-        title: taskData.title,
-        description: taskData.description,
-        dueDate: dueDate.getTime(),
-        type: taskData.type,
-        courseId: taskData.courseId,
-        priority: taskData.priority,
-        updatedAt: getCurrentTimestamp(),
-      };
-      
-      await update('tasks', updatedTask);
-      setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
-      setIsEditTaskModalOpen(false);
-      setCurrentTask(null);
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Error updating task:', err);
-      setError('Failed to update task');
-      setIsLoading(false);
-    }
-  };
+    // Parse date and time
+    const [year, month, day] = taskData.dueDate.split('-').map(Number);
+    const [hours, minutes] = taskData.dueTime.split(':').map(Number);
+    
+    const dueDate = new Date(year, month - 1, day, hours, minutes);
+    
+    const updatedTask: Task = {
+      ...currentTask,
+      title: taskData.title,
+      description: taskData.description,
+      dueDate: dueDate.getTime(),
+      type: taskData.type,
+      courseId: taskData.courseId,
+      priority: taskData.priority,
+      weight: taskData.weight,
+      updatedAt: getCurrentTimestamp(),
+    };
+    
+    await update('tasks', updatedTask);
+    setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
+    setIsEditTaskModalOpen(false);
+    setCurrentTask(null);
+    setIsLoading(false);
+  } catch (err) {
+    console.error('Error updating task:', err);
+    setError('Failed to update task');
+    setIsLoading(false);
+  }
+};
   
   // Handle deleting a task
   const handleDeleteTask = async (taskId: string) => {

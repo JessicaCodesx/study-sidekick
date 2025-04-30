@@ -13,7 +13,9 @@ export interface Course extends BaseEntity {
   instructor?: string;
   schedule?: string;
   location?: string;
-  isArchived: boolean;
+  isArchived: boolean;  
+  totalWeight?: number;
+  currentGrade?: number; // Current calculated grade percentage
 }
 
 // Unit/Module within a course
@@ -58,6 +60,8 @@ export interface Task extends BaseEntity {
   status: TaskStatus;
   priority: number; // 1-3, with 1 being highest
   reminder?: number; // timestamp for when to remind
+  weight?: number; // Percentage weight of the task (0-100)
+  grade?: number; // Percentage grade received (0-100)
 }
 
 // Academic record (past course)
@@ -65,10 +69,12 @@ export interface AcademicRecord extends BaseEntity {
   name: string;
   term: string;
   credits: number;
-  gradePercentage?: number;  // Store the percentage grade
-  letterGrade?: string;      // Store the auto-calculated letter grade
+  grade: string | number; 
+  gradePercentage?: number;
+  letterGrade?: string;
   notes?: string;
 }
+
 
 // User profile and settings
 export interface User {

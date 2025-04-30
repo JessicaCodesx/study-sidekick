@@ -1,17 +1,23 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Card, { CardContent } from '../common/Card';
-import { Course } from '../../lib/types';
+import { Course, Task } from '../../lib/types';
 import { truncateText } from '../../lib/utils';
+import { formatPercentage, percentageToLetterGrade, getGradeColor } from '../../lib/gradeUtils';
 
 interface CourseCardProps {
   course: Course;
+  tasks: Task[]; // Add tasks to calculate current grade
   onEdit: () => void;
   onArchive: () => void;
   onDelete: () => void;
 }
 
-const CourseCard = ({ course, onEdit, onArchive, onDelete }: CourseCardProps) => {
+const CourseCard = ({ course, tasks, onEdit, onArchive, onDelete }: CourseCardProps) => {
+  // Calculate current grade for this course
+  const courseTasks = tasks.filter(task => task.courseId === course.id);
+  const { percentage, letterGrade } = calculateCurrentGrade(courseTasks);
+  
   // Get appropriate background and text color classes based on the course's color theme
   const getColorClasses = (colorTheme: string) => {
     // If it's a color name from our predefined list, construct the classes
@@ -29,6 +35,37 @@ const CourseCard = ({ course, onEdit, onArchive, onDelete }: CourseCardProps) =>
     // Default fallback
     return 'bg-primary-600 text-white';
   };
+
+  // Helper function to calculate current grade
+  function calculateCurrentGrade(tasks: Task[]): { percentage: number | undefined; letterGrade: string | undefined } {
+    // Filter tasks that have grades and weights
+    const gradedTasks = tasks.filter(task => 
+      task.status === 'completed' && 
+      task.grade !== undefined && 
+      task.weight !== undefined
+    );
+    
+    if (gradedTasks.length === 0) {
+      return { percentage: undefined, letterGrade: undefined };
+    }
+    
+    let totalWeight = 0;
+    let weightedSum = 0;
+    
+    gradedTasks.forEach(task => {
+      totalWeight += task.weight!;
+      weightedSum += (task.grade! * task.weight!) / 100;
+    });
+    
+    if (totalWeight === 0) {
+      return { percentage: undefined, letterGrade: undefined };
+    }
+    
+    const percentage = (weightedSum / totalWeight) * 100;
+    const letterGrade = percentageToLetterGrade(percentage);
+    
+    return { percentage, letterGrade };
+  }
 
   return (
     <motion.div
@@ -68,6 +105,21 @@ const CourseCard = ({ course, onEdit, onArchive, onDelete }: CourseCardProps) =>
                 </p>
               )}
             </div>
+          </div>
+          
+          {/* Add current grade display */}
+          <div className="mt-3 flex items-center justify-between">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Current Grade:</span>
+            {percentage !== undefined ? (
+              <div className="flex items-center">
+                <span className="font-medium text-gray-900 dark:text-white">{formatPercentage(percentage)}</span>
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-medium ${getGradeColor(letterGrade)}`}>
+                  {letterGrade}
+                </span>
+              </div>
+            ) : (
+              <span className="text-sm text-gray-500 dark:text-gray-400">No grades yet</span>
+            )}
           </div>
           
           {course.description && (
@@ -118,6 +170,28 @@ const CourseCard = ({ course, onEdit, onArchive, onDelete }: CourseCardProps) =>
                   />
                 </svg>
                 Flashcards
+              </Link>
+              
+              {/* Add Grades Link */}
+              <Link
+                to={`/courses/${course.id}/grades`}
+                className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-orange-700 dark:text-orange-200 bg-orange-50 dark:bg-orange-900 hover:bg-orange-100 dark:hover:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+                Grades
               </Link>
               
               <Link

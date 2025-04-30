@@ -279,3 +279,50 @@ export function calculateStudyStreak(lastStudyDate: number | undefined): number 
   // Otherwise streak is broken
   return 0;
 }
+
+// Add to utils.ts
+export function calculateCurrentGrade(tasks: Task[]): { percentage: number | undefined; letterGrade: string | undefined } {
+  // Filter tasks that have grades and weights
+  const gradedTasks = tasks.filter(task => 
+    task.status === 'completed' && 
+    task.grade !== undefined && 
+    task.weight !== undefined
+  );
+  
+  if (gradedTasks.length === 0) {
+    return { percentage: undefined, letterGrade: undefined };
+  }
+  
+  let totalWeight = 0;
+  let weightedSum = 0;
+  
+  gradedTasks.forEach(task => {
+    totalWeight += task.weight!;
+    weightedSum += (task.grade! * task.weight!) / 100;
+  });
+  
+  if (totalWeight === 0) {
+    return { percentage: undefined, letterGrade: undefined };
+  }
+  
+  const percentage = (weightedSum / totalWeight) * 100;
+  const letterGrade = percentageToLetterGrade(percentage);
+  
+  return { percentage, letterGrade };
+}
+
+export function percentageToLetterGrade(percentage: number): string {
+  if (percentage >= 90) return 'A+';
+  if (percentage >= 85) return 'A';
+  if (percentage >= 80) return 'A-';
+  if (percentage >= 77) return 'B+';
+  if (percentage >= 73) return 'B';
+  if (percentage >= 70) return 'B-';
+  if (percentage >= 67) return 'C+';
+  if (percentage >= 63) return 'C';
+  if (percentage >= 60) return 'C-';
+  if (percentage >= 57) return 'D+';
+  if (percentage >= 53) return 'D';
+  if (percentage >= 50) return 'D-';
+  return 'F';
+}
