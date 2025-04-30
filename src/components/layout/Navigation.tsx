@@ -20,7 +20,7 @@ const Navigation = ({ isSidebarOpen, toggleSidebar }: NavigationProps) => {
         <div className="flex items-center">
           <button
             onClick={toggleSidebar}
-            className="mr-4 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 focus:outline-none"
+            className="mr-4 text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 focus:outline-none"
             aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
           >
             <svg
@@ -49,7 +49,7 @@ const Navigation = ({ isSidebarOpen, toggleSidebar }: NavigationProps) => {
           </button>
           
           <Link to="/" className="flex items-center">
-            <span className="text-xl font-bold text-purple-600 dark:text-purple-400">
+            <span className="text-xl font-bold text-amber-600 dark:text-amber-400">
               🎓 StudySidekick
             </span>
           </Link>
@@ -99,7 +99,7 @@ const Navigation = ({ isSidebarOpen, toggleSidebar }: NavigationProps) => {
           </button>
           
           <Link to="/settings" className="relative">
-            <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center text-purple-600 dark:text-purple-200 font-medium">
+            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-200 font-medium">
               {state.user?.displayName ? getInitials(state.user.displayName) : "?"}
             </div>
           </Link>

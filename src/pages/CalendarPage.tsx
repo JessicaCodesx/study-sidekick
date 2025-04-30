@@ -8,6 +8,8 @@ import Button from '../components/common/Button';
 import Card, { CardTitle, CardContent } from '../components/common/Card';
 import Modal, { ModalFooter } from '../components/common/Modal';
 import TaskSummary from '../components/dashboard/TaskSummary';
+import { motion } from 'framer-motion';
+
 
 // Helper for creating a calendar
 const generateCalendarDays = (year: number, month: number) => {
@@ -336,18 +338,31 @@ const handleUpdateTask = async (taskData: {
   };
   
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Calendar</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+    <div className="max-w-6xl mx-auto mt-6">
+    {/* Animated Header */}
+    <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-700 theme-pink:from-pink-50 theme-pink:to-pink-100 shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-600">
+            Calendar
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300 theme-pink:text-pink-500 mt-1">
             Manage your tasks and deadlines
           </p>
-        </div>
-        
-        <div className="mt-3 md:mt-0 flex space-x-3">
+        </motion.div>
+
+        <motion.div
+          className="mt-8 md:mt-0 flex space-x-3"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
           <Button
-            variant="outline"
+            variant="primary"
             onClick={() => {
               setSelectedDate(new Date());
               setIsAddTaskModalOpen(true);
@@ -355,14 +370,17 @@ const handleUpdateTask = async (taskData: {
           >
             Add Task
           </Button>
-        </div>
+        </motion.div>
       </div>
-      
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 rounded">
-          {error}
-        </div>
-      )}
+    </div>
+
+    {/* Error Message */}
+    {error && (
+      <div className="mb-4 p-3 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 rounded">
+        {error}
+      </div>
+    )}
+
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}

@@ -6,6 +6,8 @@ import { User } from '../lib/types';
 import Button from '../components/common/Button';
 import Card, { CardTitle, CardContent, CardFooter } from '../components/common/Card';
 import PageContainer from '../components/layout/PageContainer';
+import { motion } from 'framer-motion';
+
 
 const SettingsPage = () => {
   const { state, dispatch } = useAppContext();
@@ -184,7 +186,21 @@ const SettingsPage = () => {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-600 mb-6">Settings</h1>
+          <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-700 theme-pink:from-pink-50 theme-pink:to-pink-100 shadow-sm">
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-600">
+          Settings
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300 theme-pink:text-pink-500 mt-1">
+          Manage your profile, appearance, data, and more.
+        </p>
+      </motion.div>
+    </div>
+
       
       {error && (
         <div className="mb-6 p-3 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 theme-pink:bg-pink-100 theme-pink:text-pink-700 rounded">

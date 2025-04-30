@@ -18,6 +18,7 @@ import Modal, { ModalFooter } from '../components/common/Modal';
 import PercentageGradeInput from '../components/academic-records/PercentageGradeInput';
 import GPAChart from '../components/academic-records/GPAChart';
 import PageContainer from '../components/layout/PageContainer';
+import { motion } from 'framer-motion'; 
 
 const AcademicRecordsPage = () => {
   const { state, dispatch } = useAppContext();
@@ -115,6 +116,7 @@ const AcademicRecordsPage = () => {
         ...recordData,
         createdAt: now,
         updatedAt: now,
+        grade: ''
       };
       
       await add('academicRecords', newRecord);
@@ -231,27 +233,46 @@ const AcademicRecordsPage = () => {
   const formatGPA = (gpa: number) => {
     return gpa.toFixed(2);
   };
-
   return (
     <PageContainer>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-600">Academic Records</h1>
-          <p className="text-gray-600 dark:text-gray-400 theme-pink:text-pink-500">
-            Track your courses, grades, and GPA
-          </p>
-        </div>
-        
-        <div className="mt-3 md:mt-0">
-          <Button
-            variant="primary"
-            onClick={() => setIsAddModalOpen(true)}
+      {/* Animated Header Section */}
+      <motion.div
+        className="mb-8 mt-6 p-6 rounded-xl bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-700 theme-pink:from-pink-50 theme-pink:to-pink-100 shadow-sm"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            Add Course Record
-          </Button>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-600">
+              Academic Records
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 theme-pink:text-pink-500 mt-1">
+              Track your courses, grades, and GPA
+            </p>
+          </motion.div>
+  
+          <motion.div
+            className="mt-3 md:mt-0 flex space-x-3"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <Button
+              variant="primary"
+              onClick={() => setIsAddModalOpen(true)}
+            >
+              Add Course Record
+            </Button>
+          </motion.div>
         </div>
-      </div>
-      
+      </motion.div>
+  
+      {/* Error Banner */}
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 rounded theme-pink:bg-pink-100 theme-pink:text-red-600">
           {error}
@@ -447,7 +468,6 @@ const AcademicRecordsPage = () => {
       
       {/* GPA Chart Component */}
       <Card className="mb-6">
-        <CardTitle>GPA Trends</CardTitle>
         <CardContent className="h-80">
           <GPAChart academicRecords={records} />
         </CardContent>
