@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- Background Circle -->
+  <circle cx="60" cy="60" r="55" fill="#6366F1" />
+  
+  <!-- Book Stack -->
+  <g transform="translate(30, 30)">
+    <!-- Bottom Book -->
+    <rect x="5" y="40" width="50" height="12" rx="2" fill="#F0ABFC" />
+    
+    <!-- Middle Book -->
+    <rect x="10" y="28" width="50" height="12" rx="2" fill="#7DD3FC" />
+    
+    <!-- Top Book -->
+    <rect x="15" y="16" width="45" height="12" rx="2" fill="#86EFAC" />
+    
+    <!-- Graduation Cap -->
+    <g transform="translate(25, 0) scale(0.65)">
+      <path d="M 0,16 L 30,0 L 60,16 L 30,32 Z" fill="#F9FAFB" />
+      <path d="M 45,16 L 45,28 L 30,35 L 15,28 L 15,16" stroke="#F9FAFB" stroke-width="3" fill="none" />
+      <rect x="42" y="24" width="6" height="16" rx="2" fill="#F9FAFB" />
+    </g>
+  </g>
+  
+  <!-- App Name -->
+  <text x="60" y="100" font-family="Poppins, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="white">STUDYSIDEKICK</text>
+</svg>
