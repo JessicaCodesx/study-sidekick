@@ -58,7 +58,7 @@ export function daysUntil(timestamp: number): number {
   target.setHours(0, 0, 0, 0);
   
   const diffTime = target.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
   
   return diffDays;
 }
@@ -73,17 +73,17 @@ export function isTaskDueSoon(task: Task): boolean {
 
 /**
  * Update task status based on due date
- * Returns the updated task if status changed, otherwise returns the original task
+ * Returns the updated task if status changed otherwise returns the original task
  */
 export function updateTaskStatus(task: Task): Task {
   let newStatus: TaskStatus = task.status;
 
-  // If already completed, no change needed
+  // If already completed no change needed
   if (task.status === 'completed') {
     return task;
   }
 
-  // If due date has passed, mark as overdue
+  // If due date has passed mark as overdue
   if (daysUntil(task.dueDate) < 0) {
     newStatus = 'overdue';
   } else {
@@ -171,7 +171,7 @@ export function sortTasks(tasks: Task[]): Task[] {
 }
 
 /**
- * Get today's tasks
+ * Get todays tasks
  */
 export function getTodaysTasks(tasks: Task[]): Task[] {
   const today = new Date();
@@ -187,7 +187,7 @@ export function getTodaysTasks(tasks: Task[]): Task[] {
 }
 
 /**
- * Get this week's tasks
+ * Get this weeks tasks
  */
 export function getThisWeeksTasks(tasks: Task[]): Task[] {
   const today = new Date();
@@ -226,7 +226,7 @@ export function getInitials(name: string): string {
 }
 
 /**
- * Generate motivational quote (simple implementation)
+ * Generate motivational quote 
  */
 export function getDailyQuote(): { quote: string; author: string } {
   const quotes = [

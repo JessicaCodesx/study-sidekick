@@ -1,0 +1,98 @@
+/* src/styles/courseColors.css */
+
+:root {
+    /* Course color variables that match tailwind.config.js */
+    --course-red: #ef4444;
+    --course-orange: #f97316;
+    --course-amber: #f59e0b;
+    --course-yellow: #eab308;
+    --course-lime: #84cc16;
+    --course-green: #22c55e;
+    --course-emerald: #10b981;
+    --course-teal: #14b8a6;
+    --course-cyan: #06b6d4;
+    --course-sky: #0ea5e9;
+    --course-blue: #3b82f6;
+    --course-indigo: #6366f1;
+    --course-violet: #8b5cf6;
+    --course-purple: #a855f7;
+    --course-fuchsia: #d946ef;
+    --course-pink: #ec4899;
+    --course-rose: #f43f5e;
+  }
+  
+  /* Course color background classes */
+  .bg-course-red { background-color: var(--course-red); }
+  .bg-course-orange { background-color: var(--course-orange); }
+  .bg-course-amber { background-color: var(--course-amber); }
+  .bg-course-yellow { background-color: var(--course-yellow); }
+  .bg-course-lime { background-color: var(--course-lime); }
+  .bg-course-green { background-color: var(--course-green); }
+  .bg-course-emerald { background-color: var(--course-emerald); }
+  .bg-course-teal { background-color: var(--course-teal); }
+  .bg-course-cyan { background-color: var(--course-cyan); }
+  .bg-course-sky { background-color: var(--course-sky); }
+  .bg-course-blue { background-color: var(--course-blue); }
+  .bg-course-indigo { background-color: var(--course-indigo); }
+  .bg-course-violet { background-color: var(--course-violet); }
+  .bg-course-purple { background-color: var(--course-purple); }
+  .bg-course-fuchsia { background-color: var(--course-fuchsia); }
+  .bg-course-pink { background-color: var(--course-pink); }
+  .bg-course-rose { background-color: var(--course-rose); }
+  
+  /* Course color text classes */
+  .text-course-red { color: var(--course-red); }
+  .text-course-orange { color: var(--course-orange); }
+  .text-course-amber { color: var(--course-amber); }
+  .text-course-yellow { color: var(--course-yellow); }
+  .text-course-lime { color: var(--course-lime); }
+  .text-course-green { color: var(--course-green); }
+  .text-course-emerald { color: var(--course-emerald); }
+  .text-course-teal { color: var(--course-teal); }
+  .text-course-cyan { color: var(--course-cyan); }
+  .text-course-sky { color: var(--course-sky); }
+  .text-course-blue { color: var(--course-blue); }
+  .text-course-indigo { color: var(--course-indigo); }
+  .text-course-violet { color: var(--course-violet); }
+  .text-course-purple { color: var(--course-purple); }
+  .text-course-fuchsia { color: var(--course-fuchsia); }
+  .text-course-pink { color: var(--course-pink); }
+  .text-course-rose { color: var(--course-rose); }
+  
+  /* Course color border classes */
+  .border-course-red { border-color: var(--course-red); }
+  .border-course-orange { border-color: var(--course-orange); }
+  .border-course-amber { border-color: var(--course-amber); }
+  .border-course-yellow { border-color: var(--course-yellow); }
+  .border-course-lime { border-color: var(--course-lime); }
+  .border-course-green { border-color: var(--course-green); }
+  .border-course-emerald { border-color: var(--course-emerald); }
+  .border-course-teal { border-color: var(--course-teal); }
+  .border-course-cyan { border-color: var(--course-cyan); }
+  .border-course-sky { border-color: var(--course-sky); }
+  .border-course-blue { border-color: var(--course-blue); }
+  .border-course-indigo { border-color: var(--course-indigo); }
+  .border-course-violet { border-color: var(--course-violet); }
+  .border-course-purple { border-color: var(--course-purple); }
+  .border-course-fuchsia { border-color: var(--course-fuchsia); }
+  .border-course-pink { border-color: var(--course-pink); }
+  .border-course-rose { border-color: var(--course-rose); }
+  
+  /* Additional border-left classes for course color indicators */
+  .border-l-course-red { border-left-color: var(--course-red); }
+  .border-l-course-orange { border-left-color: var(--course-orange); }
+  .border-l-course-amber { border-left-color: var(--course-amber); }
+  .border-l-course-yellow { border-left-color: var(--course-yellow); }
+  .border-l-course-lime { border-left-color: var(--course-lime); }
+  .border-l-course-green { border-left-color: var(--course-green); }
+  .border-l-course-emerald { border-left-color: var(--course-emerald); }
+  .border-l-course-teal { border-left-color: var(--course-teal); }
+  .border-l-course-cyan { border-left-color: var(--course-cyan); }
+  .border-l-course-sky { border-left-color: var(--course-sky); }
+  .border-l-course-blue { border-left-color: var(--course-blue); }
+  .border-l-course-indigo { border-left-color: var(--course-indigo); }
+  .border-l-course-violet { border-left-color: var(--course-violet); }
+  .border-l-course-purple { border-left-color: var(--course-purple); }
+  .border-l-course-fuchsia { border-left-color: var(--course-fuchsia); }
+  .border-l-course-pink { border-left-color: var(--course-pink); }
+  .border-l-course-rose { border-left-color: var(--course-rose); }

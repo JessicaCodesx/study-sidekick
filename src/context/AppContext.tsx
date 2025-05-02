@@ -1,7 +1,7 @@
 import { createContext, useReducer, useContext, ReactNode } from 'react';
-import { Course, Unit, Note, Flashcard, Task, AcademicRecord, User } from './types';
+import { Course, Unit, Note, Flashcard, Task, AcademicRecord, User } from '../lib/types';
 
-// App State
+// App state
 interface AppState {
   courses: Course[];
   units: Unit[];
@@ -14,7 +14,7 @@ interface AppState {
   error: string | null;
 }
 
-// Initial State
+// Initial state
 const initialState: AppState = {
   courses: [],
   units: [],
@@ -27,7 +27,7 @@ const initialState: AppState = {
   error: null,
 };
 
-// Action Types
+// action types
 type ActionType =
   | { type: 'SET_COURSES'; payload: Course[] }
   | { type: 'ADD_COURSE'; payload: Course }
@@ -57,7 +57,7 @@ type ActionType =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null };
 
-// Reducer Function
+// reducer func
 const appReducer = (state: AppState, action: ActionType): AppState => {
   switch (action.type) {
     case 'SET_COURSES':
@@ -167,16 +167,16 @@ const appReducer = (state: AppState, action: ActionType): AppState => {
   }
 };
 
-// Context Type
+// context type
 interface AppContextType {
   state: AppState;
   dispatch: React.Dispatch<ActionType>;
 }
 
-// Create Context
+// create context
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Provider Component
+// provider component
 interface AppProviderProps {
   children: ReactNode;
 }
@@ -191,7 +191,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   );
 };
 
-// Custom Hook for Using Context
+// custom hook for using context
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {

@@ -193,7 +193,6 @@ export async function getAcademicRecordsByTerm(term: string): Promise<AcademicRe
 // Get user settings
 export async function getUserSettings(): Promise<User | undefined> {
   const database = await initDB();
-  // Assuming there's only one user object
   const allUsers = await database.getAll('user');
   return allUsers[0];
 }

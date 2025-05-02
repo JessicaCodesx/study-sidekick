@@ -88,6 +88,14 @@ const CourseForm = ({
     onSubmit(formData);
   };
 
+  // Get color theme classes for preview
+  const getThemeClasses = (colorName: string) => {
+    // Get appropriate background and text color
+    const bgClass = `bg-course-${colorName}`;
+    const textClass = ['yellow', 'lime', 'amber'].includes(colorName) ? 'text-gray-900' : 'text-white';
+    return `${bgClass} ${textClass}`;
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-4">
@@ -114,7 +122,7 @@ const CourseForm = ({
         
         {/* Color Theme */}
         <div>
-          <label htmlFor="colorTheme" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="colorTheme" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Color Theme *
           </label>
           <div className="mt-1 flex flex-wrap gap-2">
@@ -156,6 +164,37 @@ const CourseForm = ({
           {errors.colorTheme && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.colorTheme}</p>
           )}
+          
+          {/* Color Theme Preview */}
+          <div className="mt-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Theme Preview</h4>
+            
+            <div className="flex items-center">
+              <div 
+                className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold ${getThemeClasses(formData.colorTheme)} shadow-sm mr-3`}
+              >
+                {formData.name ? formData.name.charAt(0).toUpperCase() : 'A'}
+              </div>
+              
+              <div>
+                <div className="font-medium text-gray-900 dark:text-white">
+                  {formData.name || "Course Name"}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  Color: {colorThemes.find(t => t.value === formData.colorTheme)?.name || 'Blue'}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-2 flex space-x-2">
+              <div className={`px-3 py-1 rounded-md text-sm font-medium ${getThemeClasses(formData.colorTheme)}`}>
+                Primary Button
+              </div>
+              <div className={`px-3 py-1 rounded-md text-sm font-medium border border-course-${formData.colorTheme} text-course-${formData.colorTheme} bg-white dark:bg-gray-800`}>
+                Secondary Button
+              </div>
+            </div>
+          </div>
         </div>
         
         {/* Instructor */}

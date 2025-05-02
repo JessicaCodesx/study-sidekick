@@ -9,7 +9,8 @@ import Card, { CardTitle, CardContent } from '../components/common/Card';
 import Modal, { ModalFooter } from '../components/common/Modal';
 import TaskSummary from '../components/dashboard/TaskSummary';
 import { motion } from 'framer-motion';
-
+import PageContainer from '../components/layout/PageContainer';
+import TaskDetailModal from '../components/task/TaskDetailModal';
 
 // Helper for creating a calendar
 const generateCalendarDays = (year: number, month: number) => {
@@ -47,6 +48,7 @@ const CalendarPage = () => {
   const [tasksForSelectedDate, setTasksForSelectedDate] = useState<Task[]>([]);
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
+  const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +72,12 @@ const CalendarPage = () => {
       try {
         setIsLoading(true);
         setError(null);
+        
+        // Load courses if not already loaded
+        if (state.courses.length === 0) {
+          const courses = await getAll('courses');
+          dispatch({ type: 'SET_COURSES', payload: courses });
+        }
         
         // Load all tasks
         const allTasks = await getAll('tasks');
@@ -203,6 +211,25 @@ const CalendarPage = () => {
     return taskType ? taskType.color : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
   };
   
+  // Get course color for a task
+  const getTaskCourseColor = (task: Task) => {
+    if (!task.courseId) return null;
+    
+    const course = state.courses.find(c => c.id === task.courseId);
+    if (!course) return null;
+    
+    const colorTheme = course.colorTheme;
+    const bgClass = `bg-course-${colorTheme}`;
+    const textClass = ['yellow', 'lime', 'amber'].includes(colorTheme) ? 'text-gray-900' : 'text-white';
+    
+    return { 
+      bgClass, 
+      textClass, 
+      name: course.name,
+      colorTheme
+    };
+  };
+  
   const handleAddTask = async (taskData: {
     title: string;
     description: string;
@@ -247,58 +274,55 @@ const CalendarPage = () => {
       setIsLoading(false);
     }
   };
-  // Handle updating a task
-const handleUpdateTask = async (taskData: {
-  title: string;
-  description: string;
-  dueDate: string;
-  dueTime: string;
-  type: TaskType;
-  courseId?: string;
-  priority: number;
-  weight?: number;
-}) => {
-  if (!currentTask) return;
   
-  try {
-    setIsLoading(true);
+  // Handle updating a task
+  const handleUpdateTask = async (taskData: {
+    title: string;
+    description: string;
+    dueDate: string;
+    dueTime: string;
+    type: TaskType;
+    courseId?: string;
+    priority: number;
+    weight?: number;
+  }) => {
+    if (!currentTask) return;
     
-    // Parse date and time
-    const [year, month, day] = taskData.dueDate.split('-').map(Number);
-    const [hours, minutes] = taskData.dueTime.split(':').map(Number);
-    
-    const dueDate = new Date(year, month - 1, day, hours, minutes);
-    
-    const updatedTask: Task = {
-      ...currentTask,
-      title: taskData.title,
-      description: taskData.description,
-      dueDate: dueDate.getTime(),
-      type: taskData.type,
-      courseId: taskData.courseId,
-      priority: taskData.priority,
-      weight: taskData.weight,
-      updatedAt: getCurrentTimestamp(),
-    };
-    
-    await update('tasks', updatedTask);
-    setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
-    setIsEditTaskModalOpen(false);
-    setCurrentTask(null);
-    setIsLoading(false);
-  } catch (err) {
-    console.error('Error updating task:', err);
-    setError('Failed to update task');
-    setIsLoading(false);
-  }
-};
+    try {
+      setIsLoading(true);
+      
+      // Parse date and time
+      const [year, month, day] = taskData.dueDate.split('-').map(Number);
+      const [hours, minutes] = taskData.dueTime.split(':').map(Number);
+      
+      const dueDate = new Date(year, month - 1, day, hours, minutes);
+      
+      const updatedTask: Task = {
+        ...currentTask,
+        title: taskData.title,
+        description: taskData.description,
+        dueDate: dueDate.getTime(),
+        type: taskData.type,
+        courseId: taskData.courseId,
+        priority: taskData.priority,
+        weight: taskData.weight,
+        updatedAt: getCurrentTimestamp(),
+      };
+      
+      await update('tasks', updatedTask);
+      setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
+      setIsEditTaskModalOpen(false);
+      setCurrentTask(null);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error updating task:', err);
+      setError('Failed to update task');
+      setIsLoading(false);
+    }
+  };
   
   // Handle deleting a task
   const handleDeleteTask = async (taskId: string) => {
-    if (!window.confirm('Are you sure you want to delete this task?')) {
-      return;
-    }
-    
     try {
       setIsLoading(true);
       
@@ -308,6 +332,7 @@ const handleUpdateTask = async (taskData: {
       if (currentTask && currentTask.id === taskId) {
         setCurrentTask(null);
         setIsEditTaskModalOpen(false);
+        setIsTaskDetailModalOpen(false);
       }
       
       setIsLoading(false);
@@ -331,56 +356,76 @@ const handleUpdateTask = async (taskData: {
       
       await update('tasks', updatedTask);
       setTasks(tasks.map(t => (t.id === updatedTask.id ? updatedTask : t)));
+      
+      // Update current task if it's the same
+      if (currentTask && currentTask.id === task.id) {
+        setCurrentTask(updatedTask);
+      }
     } catch (err) {
       console.error('Error updating task status:', err);
       setError('Failed to update task status');
     }
   };
   
+  // Handle opening task details modal
+  const handleOpenTaskDetails = (task: Task) => {
+    setCurrentTask(task);
+    setIsTaskDetailModalOpen(true);
+  };
+  
+  // Handle opening task edit modal
+  const handleEditTask = (task: Task) => {
+    setCurrentTask(task);
+    setIsEditTaskModalOpen(true);
+    // Close detail modal if open
+    if (isTaskDetailModalOpen) {
+      setIsTaskDetailModalOpen(false);
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto mt-6">
-    {/* Animated Header */}
-    <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-700 theme-pink:from-pink-50 theme-pink:to-pink-100 shadow-sm">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-600">
-            Calendar
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 theme-pink:text-pink-500 mt-1">
-            Manage your tasks and deadlines
-          </p>
-        </motion.div>
-
-        <motion.div
-          className="mt-8 md:mt-0 flex space-x-3"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-        >
-          <Button
-            variant="primary"
-            onClick={() => {
-              setSelectedDate(new Date());
-              setIsAddTaskModalOpen(true);
-            }}
+    <PageContainer>
+      {/* Animated Header */}
+      <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-700 theme-pink:from-pink-50 theme-pink:to-pink-100 shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            Add Task
-          </Button>
-        </motion.div>
-      </div>
-    </div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-600">
+              Calendar
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 theme-pink:text-pink-500 mt-1">
+              Manage your tasks and deadlines
+            </p>
+          </motion.div>
 
-    {/* Error Message */}
-    {error && (
-      <div className="mb-4 p-3 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 rounded">
-        {error}
+          <motion.div
+            className="mt-8 md:mt-0 flex space-x-3"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <Button
+              variant="primary"
+              onClick={() => {
+                setSelectedDate(new Date());
+                setIsAddTaskModalOpen(true);
+              }}
+            >
+              Add Task
+            </Button>
+          </motion.div>
+        </div>
       </div>
-    )}
 
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 rounded">
+          {error}
+        </div>
+      )}
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
@@ -509,20 +554,31 @@ const handleUpdateTask = async (taskData: {
                             {tasksForDay
                               .sort((a, b) => a.dueDate - b.dueDate)
                               .slice(0, 2)
-                              .map(task => (
-                                <div
-                                  key={task.id}
-                                  className={`text-xs truncate px-1 py-0.5 rounded ${
-                                    task.status === 'completed'
-                                      ? 'line-through text-gray-500 dark:text-gray-400'
-                                      : task.status === 'overdue'
-                                      ? 'text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900'
-                                      : getTaskTypeColor(task.type)
-                                  }`}
-                                >
-                                  {task.title}
-                                </div>
-                              ))}
+                              .map(task => {
+                                // Get course color if associated with a course
+                                const courseColor = getTaskCourseColor(task);
+                                
+                                return (
+                                  <div
+                                    key={task.id}
+                                    className={`text-xs truncate px-1 py-0.5 rounded ${
+                                      task.status === 'completed'
+                                        ? 'line-through text-gray-500 dark:text-gray-400'
+                                        : task.status === 'overdue'
+                                        ? 'text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900'
+                                        : courseColor 
+                                          ? `${courseColor.bgClass} ${courseColor.textClass}`
+                                          : getTaskTypeColor(task.type)
+                                    }`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenTaskDetails(task);
+                                    }}
+                                  >
+                                    {task.title}
+                                  </div>
+                                );
+                              })}
                             
                             {tasksForDay.length > 2 && (
                               <div className="text-xs text-gray-500 dark:text-gray-400 px-1">
@@ -572,13 +628,27 @@ const handleUpdateTask = async (taskData: {
                 <div className="space-y-3">
                   {tasksForSelectedDate
                     .sort((a, b) => a.dueDate - b.dueDate)
-                    .map(task => (
-                      <TaskSummary
-                        key={task.id}
-                        task={task}
-                        onComplete={() => handleToggleTaskComplete(task)}
-                      />
-                    ))}
+                    .map(task => {
+                      // Get course color for highlighting
+                      const courseColor = getTaskCourseColor(task);
+                      
+                      return (
+                        <div
+                          key={task.id}
+                          className={`border rounded-lg overflow-hidden ${
+                            courseColor 
+                              ? `border-course-${courseColor.colorTheme}`
+                              : 'border-gray-200 dark:border-gray-700 theme-pink:border-pink-200'
+                          }`}
+                          onClick={() => handleOpenTaskDetails(task)}
+                        >
+                          <TaskSummary
+                            task={task}
+                            onComplete={() => handleToggleTaskComplete(task)}
+                          />
+                        </div>
+                      );
+                    })}
                 </div>
               )}
             </CardContent>
@@ -687,6 +757,21 @@ const handleUpdateTask = async (taskData: {
           </div>
           
           <div>
+            <label htmlFor="taskWeight" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Weight (%) (Optional)
+            </label>
+            <input
+              type="number"
+              id="taskWeight"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+              placeholder="e.g. 10 (for 10% of the course grade)"
+              min="0"
+              max="100"
+              step="0.1"
+            />
+          </div>
+          
+          <div>
             <label htmlFor="taskDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Description (Optional)
             </label>
@@ -712,6 +797,7 @@ const handleUpdateTask = async (taskData: {
               const typeSelect = document.getElementById('taskType') as HTMLSelectElement;
               const prioritySelect = document.getElementById('taskPriority') as HTMLSelectElement;
               const courseSelect = document.getElementById('taskCourse') as HTMLSelectElement;
+              const weightInput = document.getElementById('taskWeight') as HTMLInputElement;
               const descriptionTextarea = document.getElementById('taskDescription') as HTMLTextAreaElement;
               
               if (
@@ -732,6 +818,7 @@ const handleUpdateTask = async (taskData: {
                   type: typeSelect.value as TaskType,
                   courseId: courseSelect.value || undefined,
                   priority: parseInt(prioritySelect.value),
+                  weight: weightInput.value ? parseFloat(weightInput.value) : undefined
                 });
               }
             }}
@@ -849,6 +936,22 @@ const handleUpdateTask = async (taskData: {
             </div>
             
             <div>
+              <label htmlFor="editTaskWeight" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Weight (%) (Optional)
+              </label>
+              <input
+                type="number"
+                id="editTaskWeight"
+                defaultValue={currentTask.weight}
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                placeholder="e.g. 10 (for 10% of the course grade)"
+                min="0"
+                max="100"
+                step="0.1"
+              />
+            </div>
+            
+            <div>
               <label htmlFor="editTaskDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Description (Optional)
               </label>
@@ -881,6 +984,7 @@ const handleUpdateTask = async (taskData: {
               const typeSelect = document.getElementById('editTaskType') as HTMLSelectElement;
               const prioritySelect = document.getElementById('editTaskPriority') as HTMLSelectElement;
               const courseSelect = document.getElementById('editTaskCourse') as HTMLSelectElement;
+              const weightInput = document.getElementById('editTaskWeight') as HTMLInputElement;
               const descriptionTextarea = document.getElementById('editTaskDescription') as HTMLTextAreaElement;
               
               if (
@@ -901,6 +1005,7 @@ const handleUpdateTask = async (taskData: {
                   type: typeSelect.value as TaskType,
                   courseId: courseSelect.value || undefined,
                   priority: parseInt(prioritySelect.value),
+                  weight: weightInput.value ? parseFloat(weightInput.value) : undefined
                 });
               }
             }}
@@ -909,7 +1014,25 @@ const handleUpdateTask = async (taskData: {
           </Button>
         </ModalFooter>
       </Modal>
-    </div>
+      
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        task={currentTask}
+        courses={state.courses}
+        isOpen={isTaskDetailModalOpen}
+        onClose={() => {
+          setIsTaskDetailModalOpen(false);
+          setCurrentTask(null);
+        }}
+        onComplete={(taskId) => {
+          if (currentTask) {
+            handleToggleTaskComplete(currentTask);
+          }
+        }}
+        onEdit={handleEditTask}
+        onDelete={handleDeleteTask}
+      />
+    </PageContainer>
   );
 };
 

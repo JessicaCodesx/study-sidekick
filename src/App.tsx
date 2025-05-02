@@ -15,6 +15,7 @@ import SettingsPage from './pages/SettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import PageContainer from './components/layout/PageContainer';
 import CourseGradesPage from './pages/CourseGradesPage';
+import './styles/courseColors.css';
 import './App.css';
 
 function App() {

@@ -10,6 +10,15 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
   const { state } = useAppContext();
   const { courses } = state;
 
+  // Helper function to get color styles for course links
+  const getCourseColorStyle = (colorTheme: string) => {
+    // Define color variables based on the colorTheme
+    return {
+      backgroundColor: `var(--course-${colorTheme}, #3b82f6)`,
+      color: ['yellow', 'lime', 'amber'].includes(colorTheme) ? '#111827' : '#ffffff'
+    };
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -21,8 +30,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
           className="w-64 h-full bg-white dark:bg-gray-800 theme-pink:bg-pink-50 border-r border-gray-200 dark:border-gray-700 theme-pink:border-pink-200 overflow-y-auto flex-shrink-0"
         >
           <nav className="p-4 h-full flex flex-col">
-            <div className="flex-grow">
-              <ul className="space-y-1">
+            <div>
+              <ul className="space-y-1 mb-6">
                 <li>
                   <NavLink
                     to="/dashboard"
@@ -176,72 +185,131 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
               </ul>
             </div>
             
+            {/* My Courses Section - Moved up in the sidebar */}
             {courses.length > 0 && (
-              <div className="mt-6">
+              <div className="mb-6">
                 <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 theme-pink:text-pink-500 uppercase tracking-wider px-3 mb-2">
                   My Courses
                 </h3>
                 
-                <ul className="mt-2 space-y-2 overflow-y-auto max-h-64">
+                <ul className="mt-2 space-y-2 overflow-y-auto max-h-96">
                   {courses
                     .filter(course => !course.isArchived)
-                    .map(course => (
-                      <li key={course.id}>
-                        <div className="px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                          <div className="flex items-center mb-1">
-                            <div className={`w-3 h-3 rounded-full bg-course-${course.colorTheme} mr-2`}></div>
-                            <div className={`font-medium ${course.colorTheme ? `text-course-${course.colorTheme}` : 'text-amber-600 dark:text-amber-400 theme-pink:text-pink-600'}`}>
-                              {course.name}
+                    .map(course => {
+                      // Get course color
+                      const dotColor = {
+                        backgroundColor: `var(--course-${course.colorTheme}, #3b82f6)`
+                      };
+                      
+                      // Course name color
+                      const courseNameColor = {
+                        color: `var(--course-${course.colorTheme}, #3b82f6)`
+                      };
+
+                      return (
+                        <li key={course.id}>
+                          <div className="px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                            <div className="flex items-center mb-1">
+                              {/* Course color indicator */}
+                              <div 
+                                className="w-3 h-3 rounded-full mr-2"
+                                style={dotColor}
+                              ></div>
+                              {/* Course name in course color */}
+                              <div 
+                                className="font-medium"
+                                style={courseNameColor}
+                              >
+                                {course.name}
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-1 text-sm">
+                              {/* Course links with proper coloring when active */}
+                              <NavLink
+                                to={`/courses/${course.id}/notes`}
+                                className={({ isActive }) => {
+                                  const baseClass = "px-2 py-1 rounded";
+                                  
+                                  if (isActive) {
+                                    return `${baseClass} text-white`; // Will set background inline
+                                  }
+                                  
+                                  return `${baseClass} text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100`;
+                                }}
+                                style={({ isActive }) => 
+                                  isActive ? getCourseColorStyle(course.colorTheme) : {}
+                                }
+                              >
+                                Notes
+                              </NavLink>
+                              
+                              <NavLink
+                                to={`/courses/${course.id}/flashcards`}
+                                className={({ isActive }) => {
+                                  const baseClass = "px-2 py-1 rounded";
+                                  
+                                  if (isActive) {
+                                    return `${baseClass} text-white`; // Will set background inline
+                                  }
+                                  
+                                  return `${baseClass} text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100`;
+                                }}
+                                style={({ isActive }) => 
+                                  isActive ? getCourseColorStyle(course.colorTheme) : {}
+                                }
+                              >
+                                Flashcards
+                              </NavLink>
+                              
+                              {/* Grades Link */}
+                              <NavLink
+                                to={`/courses/${course.id}/grades`}
+                                className={({ isActive }) => {
+                                  const baseClass = "px-2 py-1 rounded";
+                                  
+                                  if (isActive) {
+                                    return `${baseClass} text-white`; // Will set background inline
+                                  }
+                                  
+                                  return `${baseClass} text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100`;
+                                }}
+                                style={({ isActive }) => 
+                                  isActive ? getCourseColorStyle(course.colorTheme) : {}
+                                }
+                              >
+                                Grades
+                              </NavLink>
+
+                              {/* Tasks Link */}
+                              <NavLink
+                                to={`/calendar?course=${course.id}`}
+                                className={({ isActive }) => {
+                                  const baseClass = "px-2 py-1 rounded";
+                                  
+                                  if (isActive) {
+                                    return `${baseClass} text-white`; // Will set background inline
+                                  }
+                                  
+                                  return `${baseClass} text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100`;
+                                }}
+                                style={({ isActive }) => 
+                                  isActive ? getCourseColorStyle(course.colorTheme) : {}
+                                }
+                              >
+                                Tasks
+                              </NavLink>
                             </div>
                           </div>
-                          
-                          <div className="flex flex-wrap gap-1 text-sm">
-                            <NavLink
-                              to={`/courses/${course.id}/notes`}
-                              className={({ isActive }) =>
-                                `px-2 py-1 rounded ${
-                                  isActive
-                                    ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700'
-                                    : 'text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
-                                }`
-                              }
-                            >
-                              Notes
-                            </NavLink>
-                            
-                            <NavLink
-                              to={`/courses/${course.id}/flashcards`}
-                              className={({ isActive }) =>
-                                `px-2 py-1 rounded ${
-                                  isActive
-                                    ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700'
-                                    : 'text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
-                                }`
-                              }
-                            >
-                              Flashcards
-                            </NavLink>
-                            
-                            {/* Add Grades Link */}
-                            <NavLink
-                              to={`/courses/${course.id}/grades`}
-                              className={({ isActive }) =>
-                                `px-2 py-1 rounded ${
-                                  isActive
-                                    ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700'
-                                    : 'text-gray-600 dark:text-gray-400 theme-pink:text-pink-600 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
-                                }`
-                              }
-                            >
-                              Grades
-                            </NavLink>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                 </ul>
               </div>
             )}
+            
+            {/* Empty flex-grow div to push content to top */}
+            <div className="flex-grow"></div>
           </nav>
         </motion.aside>
       )}
