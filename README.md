@@ -20,7 +20,7 @@ A polished, offline-capable, all-in-one study assistant designed to help student
 - **Fully Responsive**: Works on desktop and mobile devices
 - **Data Export/Import**: Backup and transfer your study data
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v16 or newer)
@@ -59,7 +59,7 @@ npm run build
 yarn build
 ```
 
-## 🏗️ Tech Stack
+## 🏗Tech Stack
 
 - **Frontend**: React + TypeScript
 - **UI**: Tailwind CSS + Framer Motion
@@ -68,7 +68,7 @@ yarn build
 - **Storage**: IndexedDB (via [idb](https://github.com/jakearchibald/idb))
 - **Build Tool**: Vite
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 src/
