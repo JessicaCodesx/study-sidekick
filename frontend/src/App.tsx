@@ -10,6 +10,9 @@ import Navigation from './components/layout/Navigation';
 import Sidebar from './components/layout/Sidebar';
 import PageContainer from './components/layout/PageContainer';
 
+import LandingPage from './pages/LandingPage';
+
+
 import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
 import NotesPage from './pages/NotesPage';
@@ -27,6 +30,7 @@ import './App.css';
 import SignIn from './components/auth/SignIn';
 import SignUp from './components/auth/SignUp';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import React from 'react';
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -135,6 +139,7 @@ function App() {
 
               <Routes>
                 {/* Public Auth Routes */}
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
 
