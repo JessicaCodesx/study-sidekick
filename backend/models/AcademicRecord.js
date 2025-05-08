@@ -1,13 +1,20 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const academicRecordSchema = new mongoose.Schema({
+const academicRecordSchema = new Schema({
+  // Client-generated ID field
+  id: {
+    type: String,
+    required: true,
+    unique: true
+  },
   name: {
     type: String,
     required: true
   },
   term: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   credits: {
     type: Number,
@@ -17,12 +24,18 @@ const academicRecordSchema = new mongoose.Schema({
   gradePercentage: Number,
   letterGrade: String,
   notes: String,
+  // Link to user by Firebase UID
   firebaseId: {
     type: String,
-    required: true
+    required: true,
+    index: true
   }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('AcademicRecord', academicRecordSchema);
+// Add compound indices
+academicRecordSchema.index({ firebaseId: 1, term: 1 });
+academicRecordSchema.index({ firebaseId: 1, id: 1 });
+
+export default model('AcademicRecord', academicRecordSchema);

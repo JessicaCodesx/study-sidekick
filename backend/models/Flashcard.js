@@ -1,15 +1,21 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const flashcardSchema = new mongoose.Schema({
+const flashcardSchema = new Schema({
+  // Client-generated ID field
+  id: {
+    type: String,
+    required: true,
+    unique: true
+  },
   courseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
-    required: true
+    type: String,
+    required: true,
+    index: true
   },
   unitId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Unit',
-    required: true
+    type: String,
+    required: true,
+    index: true
   },
   question: {
     type: String,
@@ -31,12 +37,21 @@ const flashcardSchema = new mongoose.Schema({
     max: 5
   },
   lastReviewed: Date,
+  // Link to user by Firebase UID
   firebaseId: {
     type: String,
-    required: true
+    required: true,
+    index: true
   }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('Flashcard', flashcardSchema);
+// Add compound indices
+flashcardSchema.index({ firebaseId: 1, courseId: 1 });
+flashcardSchema.index({ firebaseId: 1, unitId: 1 });
+flashcardSchema.index({ firebaseId: 1, id: 1 });
+// Performance index for confidence-based queries
+flashcardSchema.index({ firebaseId: 1, confidenceLevel: 1 });
+
+export default model('Flashcard', flashcardSchema);

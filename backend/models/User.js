@@ -1,10 +1,11 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   firebaseId: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    index: true
   },
   email: {
     type: String,
@@ -28,9 +29,14 @@ const userSchema = new mongoose.Schema({
   },
   lastStudyDate: {
     type: Date
+  },
+  // Add fields to track synchronization
+  lastSyncTimestamp: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('User', userSchema);
+export default model('User', userSchema);

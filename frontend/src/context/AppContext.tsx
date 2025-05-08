@@ -1,10 +1,12 @@
-import { createContext, useReducer, useContext, ReactNode, useEffect, Dispatch } from 'react';
+// src/context/AppContext.tsx
+import React, { createContext, useReducer, useContext, ReactNode, useEffect, Dispatch } from 'react';
 import { useAuth } from './AuthContext';
 import { Course, Unit, Note, Flashcard, Task, AcademicRecord, User } from '../lib/types';
-import { getAll, getUserSettings } from '../lib/db';
+import { getAll, getUserSettings, update } from '../lib/db';
+import { syncDataToServer, pullChangesFromServer } from '../lib/sync';
 
 // App state
-interface AppState {
+export interface AppState {
   courses: Course[];
   units: Unit[];
   notes: Note[];
@@ -14,6 +16,8 @@ interface AppState {
   user: User | null;
   loading: boolean;
   error: string | null;
+  lastSync: number | null;
+  isSyncing: boolean;
 }
 
 // Initial state
@@ -27,6 +31,8 @@ const initialState: AppState = {
   user: null,
   loading: false,
   error: null,
+  lastSync: null,
+  isSyncing: false,
 };
 
 // Action types
@@ -57,7 +63,10 @@ type ActionType =
   | { type: 'DELETE_ACADEMIC_RECORD'; payload: string }
   | { type: 'SET_USER'; payload: User | null }
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null };
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_LAST_SYNC'; payload: number }
+  | { type: 'SET_IS_SYNCING'; payload: boolean }
+  | { type: 'MERGE_CHANGES'; payload: Partial<AppState> };
 
 // Reducer function
 const appReducer = (state: AppState, action: ActionType): AppState => {
@@ -164,6 +173,12 @@ const appReducer = (state: AppState, action: ActionType): AppState => {
       return { ...state, loading: action.payload };
     case 'SET_ERROR':
       return { ...state, error: action.payload };
+    case 'SET_LAST_SYNC':
+      return { ...state, lastSync: action.payload };
+    case 'SET_IS_SYNCING':
+      return { ...state, isSyncing: action.payload };
+    case 'MERGE_CHANGES':
+      return { ...state, ...action.payload };
     default:
       return state;
   }
@@ -173,6 +188,7 @@ const appReducer = (state: AppState, action: ActionType): AppState => {
 interface AppContextType {
   state: AppState;
   dispatch: Dispatch<ActionType>;
+  syncData: () => Promise<void>;
 }
 
 // Create context
@@ -208,9 +224,21 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         const academicRecords = await getAll('academicRecords', currentUser.uid);
         dispatch({ type: 'SET_ACADEMIC_RECORDS', payload: academicRecords });
         
+        const notes = await getAll('notes', currentUser.uid);
+        dispatch({ type: 'SET_NOTES', payload: notes });
+
+        const units = await getAll('units', currentUser.uid);
+        dispatch({ type: 'SET_UNITS', payload: units });
+        
         // Load user settings - handle possible undefined return
         const userSettings = await getUserSettings();
         dispatch({ type: 'SET_USER', payload: userSettings || null });
+        
+        // Try to retrieve last sync time from localStorage
+        const lastSync = localStorage.getItem('lastSync');
+        if (lastSync) {
+          dispatch({ type: 'SET_LAST_SYNC', payload: parseInt(lastSync) });
+        }
         
         dispatch({ type: 'SET_LOADING', payload: false });
       } catch (error) {
@@ -222,6 +250,91 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     
     loadUserData();
   }, [currentUser]);
+
+  // Handle online/offline sync
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const handleOnline = () => {
+      syncData();
+    };
+
+    const handleOffline = () => {
+      // Optionally notify user of offline status
+      console.log('App is now offline. Changes will be synced when online.');
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    // Set up periodic sync while online (every 5 minutes)
+    const syncInterval = setInterval(() => {
+      if (navigator.onLine && currentUser) {
+        syncData();
+      }
+    }, 5 * 60 * 1000);
+    
+    // Initial sync if online when component mounts
+    if (navigator.onLine) {
+      syncData();
+    }
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      clearInterval(syncInterval);
+    };
+  }, [currentUser]);
+
+  // Sync data function that can be called manually
+  const syncData = async () => {
+    if (!currentUser || !navigator.onLine || state.isSyncing) return;
+    
+    try {
+      dispatch({ type: 'SET_IS_SYNCING', payload: true });
+      
+      // Push local changes to server
+      await syncDataToServer(currentUser.uid, state);
+      
+      // Pull changes from server
+      const serverChanges = await pullChangesFromServer(state.lastSync || 0);
+      
+      // Merge changes with local data
+      if (serverChanges) {
+        // For each entity type, update local state with server changes
+        if (serverChanges.courses && serverChanges.courses.length > 0) {
+          const updatedCourses = [...state.courses];
+          for (const serverCourse of serverChanges.courses) {
+            const localIndex = updatedCourses.findIndex(c => c.id === serverCourse.id);
+            if (localIndex >= 0) {
+              // Update existing
+              updatedCourses[localIndex] = serverCourse;
+              await update('courses', serverCourse);
+            } else {
+              // Add new
+              updatedCourses.push(serverCourse);
+              await update('courses', serverCourse);
+            }
+          }
+          dispatch({ type: 'SET_COURSES', payload: updatedCourses });
+        }
+        
+        // Repeat for other entity types (tasks, flashcards, etc.)
+        
+        // Update last sync timestamp
+        if (serverChanges.timestamp) {
+          dispatch({ type: 'SET_LAST_SYNC', payload: serverChanges.timestamp });
+          localStorage.setItem('lastSync', serverChanges.timestamp.toString());
+        }
+      }
+      
+      dispatch({ type: 'SET_IS_SYNCING', payload: false });
+    } catch (error) {
+      console.error('Error syncing data:', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to sync data' });
+      dispatch({ type: 'SET_IS_SYNCING', payload: false });
+    }
+  };
 
   // Function to add userId to appropriate entity types
   const dispatchWithUser = (action: ActionType) => {
@@ -276,7 +389,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   };
   
   return (
-    <AppContext.Provider value={{ state, dispatch: dispatchWithUser }}>
+    <AppContext.Provider value={{ state, dispatch: dispatchWithUser, syncData }}>
       {children}
     </AppContext.Provider>
   );

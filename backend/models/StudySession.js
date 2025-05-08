@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-const unitSchema = new Schema({
+const studySessionSchema = new Schema({
   // Client-generated ID field
   id: {
     type: String,
@@ -12,15 +12,16 @@ const unitSchema = new Schema({
     required: true,
     index: true
   },
-  name: {
-    type: String,
-    required: true
-  },
-  orderIndex: {
+  duration: {
     type: Number,
     required: true
   },
-  description: String,
+  date: {
+    type: Number,
+    required: true,
+    index: true
+  },
+  notes: String,
   // Link to user by Firebase UID
   firebaseId: {
     type: String,
@@ -32,7 +33,8 @@ const unitSchema = new Schema({
 });
 
 // Add compound indices
-unitSchema.index({ firebaseId: 1, courseId: 1 });
-unitSchema.index({ firebaseId: 1, id: 1 });
+studySessionSchema.index({ firebaseId: 1, courseId: 1 });
+studySessionSchema.index({ firebaseId: 1, date: 1 });
+studySessionSchema.index({ firebaseId: 1, id: 1 });
 
-export default model('Unit', unitSchema);
+export default model('StudySession', studySessionSchema);

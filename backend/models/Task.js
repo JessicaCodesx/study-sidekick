@@ -1,9 +1,15 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const taskSchema = new mongoose.Schema({
+const taskSchema = new Schema({
+  // Client-generated ID field
+  id: {
+    type: String,
+    required: true,
+    unique: true
+  },
   courseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course'
+    type: String,
+    index: true
   },
   title: {
     type: String,
@@ -12,7 +18,8 @@ const taskSchema = new mongoose.Schema({
   description: String,
   dueDate: {
     type: Date,
-    required: true
+    required: true,
+    index: true
   },
   type: {
     type: String,
@@ -22,7 +29,8 @@ const taskSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['pending', 'completed', 'overdue'],
-    default: 'pending'
+    default: 'pending',
+    index: true
   },
   priority: {
     type: Number,
@@ -32,12 +40,21 @@ const taskSchema = new mongoose.Schema({
   },
   weight: Number,
   grade: Number,
+  completedAt: Date,
+  // Link to user by Firebase UID
   firebaseId: {
     type: String,
-    required: true
+    required: true,
+    index: true
   }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('Task', taskSchema);
+// Add compound indices
+taskSchema.index({ firebaseId: 1, courseId: 1 });
+taskSchema.index({ firebaseId: 1, dueDate: 1 });
+taskSchema.index({ firebaseId: 1, status: 1 });
+taskSchema.index({ firebaseId: 1, id: 1 });
+
+export default model('Task', taskSchema);

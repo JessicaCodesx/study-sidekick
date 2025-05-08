@@ -1,7 +1,12 @@
-// backend/models/Course.js
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const courseSchema = new mongoose.Schema({
+const courseSchema = new Schema({
+  // Client-generated ID field to match IndexedDB IDs
+  id: {
+    type: String,
+    required: true,
+    unique: true
+  },
   name: {
     type: String,
     required: true
@@ -20,13 +25,17 @@ const courseSchema = new mongoose.Schema({
   },
   totalWeight: Number,
   currentGrade: Number,
-  // Link to user by Firebase UID instead of MongoDB ObjectId
+  // Link to user by Firebase UID
   firebaseId: {
     type: String,
-    required: true
+    required: true,
+    index: true // Add index for performance
   }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('Course', courseSchema);
+// Add compound index for faster queries
+courseSchema.index({ firebaseId: 1, id: 1 });
+
+export default model('Course', courseSchema);

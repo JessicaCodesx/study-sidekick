@@ -1,15 +1,21 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const noteSchema = new mongoose.Schema({
+const noteSchema = new Schema({
+  // Client-generated ID field
+  id: {
+    type: String,
+    required: true,
+    unique: true
+  },
   courseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
-    required: true
+    type: String,
+    required: true,
+    index: true
   },
   unitId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Unit',
-    required: true
+    type: String,
+    required: true,
+    index: true
   },
   title: {
     type: String,
@@ -20,12 +26,19 @@ const noteSchema = new mongoose.Schema({
     required: true
   },
   tags: [String],
+  // Link to user by Firebase UID
   firebaseId: {
     type: String,
-    required: true
+    required: true,
+    index: true
   }
 }, {
   timestamps: true
 });
 
-module.exports = mongoose.model('Note', noteSchema);
+// Add compound indices for faster queries
+noteSchema.index({ firebaseId: 1, courseId: 1 });
+noteSchema.index({ firebaseId: 1, unitId: 1 });
+noteSchema.index({ firebaseId: 1, id: 1 });
+
+export default model('Note', noteSchema);
