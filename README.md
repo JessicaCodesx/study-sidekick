@@ -2,9 +2,7 @@
 
 A polished, offline-capable, all-in-one study assistant designed to help students manage their courses, due dates, notes, flashcards, grades, and study schedules in one beautifully organized place.
 
-![StudySidekick Dashboard](https://i.imgur.com/placeholder-image.png)
-
-## 📚 Features
+##  Features
 
 ### Core Features
 - **Course Management**: Add, edit, and organize your courses with custom color themes
@@ -89,7 +87,7 @@ src/
 └── assets/          # Static assets
 ```
 
-## 🧠 Data Storage
+## Data Storage
 
 StudySidekick uses IndexedDB for client-side storage with the following object stores:
 
@@ -101,7 +99,7 @@ StudySidekick uses IndexedDB for client-side storage with the following object s
 - **academicRecords**: Past courses, grades, and GPA tracking
 - **user**: User preferences and study streak data
 
-## 🔨 Adding New Features
+##  Adding New Features
 
 To create a new feature:
 
@@ -112,11 +110,7 @@ To create a new feature:
 5. Create or update page components in the `pages` directory
 6. Add routes to `App.tsx` if creating new pages
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [React](https://reactjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
@@ -128,7 +122,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🚧 Future Features / Roadmap
+## Future Features / Roadmap
 
 - PDF & image upload for lecture slides
 - OCR + NLP flashcard generation from notes
