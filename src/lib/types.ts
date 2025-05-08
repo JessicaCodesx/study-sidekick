@@ -3,6 +3,7 @@ export interface BaseEntity {
   id: string;
   createdAt: number; // timestamp
   updatedAt: number; // timestamp
+  userId?: string; // associates with Firebase user 
 }
 
 // Course related types
@@ -83,6 +84,7 @@ export interface User {
   theme: 'light' | 'dark' | 'system' | 'pink';
   studyStreak: number; // Days in a row
   lastStudyDate?: number; // timestamp
+  userId?: string; // Add Firebase user ID field
 }
 
 // Study session tracking

@@ -1,5 +1,7 @@
-import { createContext, useReducer, useContext, ReactNode } from 'react';
+import { createContext, useReducer, useContext, ReactNode, useEffect, Dispatch } from 'react';
+import { useAuth } from './AuthContext';
 import { Course, Unit, Note, Flashcard, Task, AcademicRecord, User } from '../lib/types';
+import { getAll, getUserSettings } from '../lib/db';
 
 // App state
 interface AppState {
@@ -27,7 +29,7 @@ const initialState: AppState = {
   error: null,
 };
 
-// action types
+// Action types
 type ActionType =
   | { type: 'SET_COURSES'; payload: Course[] }
   | { type: 'ADD_COURSE'; payload: Course }
@@ -57,7 +59,7 @@ type ActionType =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null };
 
-// reducer func
+// Reducer function
 const appReducer = (state: AppState, action: ActionType): AppState => {
   switch (action.type) {
     case 'SET_COURSES':
@@ -167,31 +169,120 @@ const appReducer = (state: AppState, action: ActionType): AppState => {
   }
 };
 
-// context type
+// Context type
 interface AppContextType {
   state: AppState;
-  dispatch: React.Dispatch<ActionType>;
+  dispatch: Dispatch<ActionType>;
 }
 
-// create context
+// Create context
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// provider component
+// Provider component
 interface AppProviderProps {
   children: ReactNode;
 }
 
 export const AppProvider = ({ children }: AppProviderProps) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const { currentUser } = useAuth();
+  
+  // Load user-specific data when user changes
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!currentUser) return;
+      
+      try {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        
+        // Load all user data with userId filter
+        const courses = await getAll('courses', currentUser.uid);
+        dispatch({ type: 'SET_COURSES', payload: courses });
+        
+        const tasks = await getAll('tasks', currentUser.uid);
+        dispatch({ type: 'SET_TASKS', payload: tasks });
+        
+        const flashcards = await getAll('flashcards', currentUser.uid);
+        dispatch({ type: 'SET_FLASHCARDS', payload: flashcards });
+        
+        const academicRecords = await getAll('academicRecords', currentUser.uid);
+        dispatch({ type: 'SET_ACADEMIC_RECORDS', payload: academicRecords });
+        
+        // Load user settings - handle possible undefined return
+        const userSettings = await getUserSettings();
+        dispatch({ type: 'SET_USER', payload: userSettings || null });
+        
+        dispatch({ type: 'SET_LOADING', payload: false });
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to load user data' });
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+    };
+    
+    loadUserData();
+  }, [currentUser]);
 
+  // Function to add userId to appropriate entity types
+  const dispatchWithUser = (action: ActionType) => {
+    if (currentUser && 
+        (action.type.startsWith('ADD_') || action.type.startsWith('UPDATE_'))) {
+      
+      // We need to handle each entity type specifically to make TypeScript happy
+      if (action.type === 'ADD_COURSE' || action.type === 'UPDATE_COURSE') {
+        dispatch({
+          ...action,
+          payload: { ...action.payload, userId: currentUser.uid }
+        });
+      } 
+      else if (action.type === 'ADD_UNIT' || action.type === 'UPDATE_UNIT') {
+        dispatch({
+          ...action,
+          payload: { ...action.payload, userId: currentUser.uid }
+        });
+      }
+      else if (action.type === 'ADD_NOTE' || action.type === 'UPDATE_NOTE') {
+        dispatch({
+          ...action,
+          payload: { ...action.payload, userId: currentUser.uid }
+        });
+      }
+      else if (action.type === 'ADD_FLASHCARD' || action.type === 'UPDATE_FLASHCARD') {
+        dispatch({
+          ...action,
+          payload: { ...action.payload, userId: currentUser.uid }
+        });
+      }
+      else if (action.type === 'ADD_TASK' || action.type === 'UPDATE_TASK') {
+        dispatch({
+          ...action,
+          payload: { ...action.payload, userId: currentUser.uid }
+        });
+      }
+      else if (action.type === 'ADD_ACADEMIC_RECORD' || action.type === 'UPDATE_ACADEMIC_RECORD') {
+        dispatch({
+          ...action,
+          payload: { ...action.payload, userId: currentUser.uid }
+        });
+      }
+      else {
+        // For any other action, just pass it through
+        dispatch(action);
+      }
+    } else {
+      // For any other action, just pass it through
+      dispatch(action);
+    }
+  };
+  
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
+    <AppContext.Provider value={{ state, dispatch: dispatchWithUser }}>
       {children}
     </AppContext.Provider>
   );
 };
 
-// custom hook for using context
+// Custom hook for using context
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
