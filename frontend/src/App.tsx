@@ -278,18 +278,3 @@ function App() {
 }
 
 export default App;
-                 </main>
-                      </div>
-                    </>
-                  </ProtectedRoute>
-                } />
-              </Routes>
-            </div>
-          </HashRouter>
-        </AppProvider>
-      </AuthProvider>
-    </ThemeContext.Provider>
-  );
-}
-
-export default App;
