@@ -88,29 +88,33 @@ const Dashboard = () => {
   const totalFlashcards = state.flashcards.length;
   const masteredFlashcards = state.flashcards.filter(fc => fc.confidenceLevel >= 4).length;
 
-  // Animation variants
+  // Enhanced animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
+      scale: 1,
       transition: {
         type: 'spring',
-        stiffness: 100,
-        damping: 10,
+        stiffness: 120,
+        damping: 14,
+        mass: 0.8,
       },
     },
   };
+  
 
   return (
     <div className="dashboard-container p-6 overflow-y-auto custom-scrollbar">
@@ -226,8 +230,9 @@ const Dashboard = () => {
         >
           {/* Active Courses */}
           <motion.div
-            whileHover={{ scale: 1.05, y: -5 }}
-            whileTap={{ scale: 0.95 }}
+            variants={itemVariants}
+            whileHover={{ scale: 1.03, y: -6 }}
+            whileTap={{ scale: 0.98 }}
             className="group"
           >
             <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-blue-500/20 via-blue-400/20 to-cyan-500/20 dark:from-blue-600/30 dark:via-blue-500/30 dark:to-cyan-600/30 h-full">
@@ -278,8 +283,9 @@ const Dashboard = () => {
 
           {/* Pending Tasks */}
           <motion.div
-            whileHover={{ scale: 1.05, y: -5 }}
-            whileTap={{ scale: 0.95 }}
+            variants={itemVariants}
+            whileHover={{ scale: 1.03, y: -6 }}
+            whileTap={{ scale: 0.98 }}
             className="group"
           >
             <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-orange-500/20 via-amber-400/20 to-yellow-500/20 dark:from-orange-600/30 dark:via-amber-500/30 dark:to-yellow-600/30 h-full">
@@ -304,8 +310,9 @@ const Dashboard = () => {
 
           {/* Flashcards Mastered */}
           <motion.div
-            whileHover={{ scale: 1.05, y: -5 }}
-            whileTap={{ scale: 0.95 }}
+            variants={itemVariants}
+            whileHover={{ scale: 1.03, y: -6 }}
+            whileTap={{ scale: 0.98 }}
             className="group"
           >
             <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-purple-500/20 via-pink-400/20 to-rose-500/20 dark:from-purple-600/30 dark:via-pink-500/30 dark:to-rose-600/30 theme-pink:from-pink-500/30 theme-pink:via-rose-400/30 theme-pink:to-fuchsia-500/30 h-full">
@@ -361,11 +368,22 @@ const Dashboard = () => {
                     {todaysTasks.map((task, index) => (
                       <motion.div
                         key={task.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        whileHover={{ x: 5 }}
+                        initial={{ opacity: 0, x: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        transition={{ 
+                          delay: index * 0.05,
+                          type: 'spring',
+                          stiffness: 200,
+                          damping: 20
+                        }}
+                        whileHover={{ 
+                          x: 8,
+                          scale: 1.02,
+                          transition: { type: 'spring', stiffness: 400, damping: 17 }
+                        }}
+                        whileTap={{ scale: 0.98 }}
                         className={`
+                          transition-all duration-200
                           ${task.priority === 1 ? 'ring-2 ring-red-500/50 rounded-lg p-1' : ''}
                           ${task.dueDate < today.getTime() ? 'ring-2 ring-red-600 rounded-lg p-1 bg-red-50/50 dark:bg-red-900/20' : ''}
                         `}

@@ -1,4 +1,5 @@
 import { ReactNode, ButtonHTMLAttributes } from 'react';
+import { motion } from 'framer-motion';
 import classNames from 'classnames';
 
 type ButtonSize = 'sm' | 'md' | 'lg';

@@ -28,86 +28,428 @@ body, html {
   text-align: left; /* Reset text-align */
 }
 
+/* ============================================
+   THEME COLOR DEFINITIONS
+   ============================================ */
+
 /* Pink theme styles */
 .theme-pink {
-  /* Base colors */
-  --pink-primary: #ec4899;
-  --pink-secondary: #f472b6;
-  --pink-accent: #d946ef;
-  --pink-light: #fdf2f8;
-  --pink-medium: #fce7f3;
-  --pink-dark: #831843;
-  --pink-text: #9d174d;
-  --pink-text-light: #db2777;
+  --theme-primary: #ec4899;
+  --theme-secondary: #f472b6;
+  --theme-accent: #d946ef;
+  --theme-bg-light: #fdf2f8;
+  --theme-bg-medium: #fce7f3;
+  --theme-bg-dark: #831843;
+  --theme-text: #9d174d;
+  --theme-text-light: #db2777;
+  --theme-border: rgba(244, 114, 182, 0.2);
 }
 
-/* Apply pink theme to buttons */
+.theme-pink.dark {
+  --theme-primary: #f472b6;
+  --theme-secondary: #ec4899;
+  --theme-accent: #f0abfc;
+  --theme-bg-light: #831843;
+  --theme-bg-medium: #9d174d;
+  --theme-bg-dark: #500724;
+  --theme-text: #fce7f3;
+  --theme-text-light: #fdf2f8;
+  --theme-border: rgba(244, 114, 182, 0.3);
+}
+
+/* Ocean theme - Blue/Teal aesthetic */
+.theme-ocean {
+  --theme-primary: #06b6d4;
+  --theme-secondary: #22d3ee;
+  --theme-accent: #0891b2;
+  --theme-bg-light: #ecfeff;
+  --theme-bg-medium: #cffafe;
+  --theme-bg-dark: #164e63;
+  --theme-text: #0e7490;
+  --theme-text-light: #06b6d4;
+  --theme-border: rgba(6, 182, 212, 0.2);
+}
+
+.theme-ocean.dark {
+  --theme-primary: #22d3ee;
+  --theme-secondary: #06b6d4;
+  --theme-accent: #67e8f9;
+  --theme-bg-light: #164e63;
+  --theme-bg-medium: #155e75;
+  --theme-bg-dark: #083344;
+  --theme-text: #cffafe;
+  --theme-text-light: #ecfeff;
+  --theme-border: rgba(34, 211, 238, 0.3);
+}
+
+/* Forest theme - Green/Nature aesthetic */
+.theme-forest {
+  --theme-primary: #10b981;
+  --theme-secondary: #34d399;
+  --theme-accent: #059669;
+  --theme-bg-light: #ecfdf5;
+  --theme-bg-medium: #d1fae5;
+  --theme-bg-dark: #064e3b;
+  --theme-text: #047857;
+  --theme-text-light: #10b981;
+  --theme-border: rgba(16, 185, 129, 0.2);
+}
+
+.theme-forest.dark {
+  --theme-primary: #34d399;
+  --theme-secondary: #10b981;
+  --theme-accent: #6ee7b7;
+  --theme-bg-light: #064e3b;
+  --theme-bg-medium: #065f46;
+  --theme-bg-dark: #022c22;
+  --theme-text: #d1fae5;
+  --theme-text-light: #ecfdf5;
+  --theme-border: rgba(52, 211, 153, 0.3);
+}
+
+/* Sunset theme - Orange/Pink aesthetic */
+.theme-sunset {
+  --theme-primary: #f97316;
+  --theme-secondary: #fb923c;
+  --theme-accent: #ea580c;
+  --theme-bg-light: #fff7ed;
+  --theme-bg-medium: #ffedd5;
+  --theme-bg-dark: #7c2d12;
+  --theme-text: #c2410c;
+  --theme-text-light: #f97316;
+  --theme-border: rgba(249, 115, 22, 0.2);
+}
+
+.theme-sunset.dark {
+  --theme-primary: #fb923c;
+  --theme-secondary: #f97316;
+  --theme-accent: #fdba74;
+  --theme-bg-light: #7c2d12;
+  --theme-bg-medium: #9a3412;
+  --theme-bg-dark: #431407;
+  --theme-text: #ffedd5;
+  --theme-text-light: #fff7ed;
+  --theme-border: rgba(251, 146, 60, 0.3);
+}
+
+/* Lavender theme - Purple aesthetic */
+.theme-lavender {
+  --theme-primary: #a855f7;
+  --theme-secondary: #c084fc;
+  --theme-accent: #9333ea;
+  --theme-bg-light: #faf5ff;
+  --theme-bg-medium: #f3e8ff;
+  --theme-bg-dark: #581c87;
+  --theme-text: #7e22ce;
+  --theme-text-light: #a855f7;
+  --theme-border: rgba(168, 85, 247, 0.2);
+}
+
+.theme-lavender.dark {
+  --theme-primary: #c084fc;
+  --theme-secondary: #a855f7;
+  --theme-accent: #d8b4fe;
+  --theme-bg-light: #581c87;
+  --theme-bg-medium: #6b21a8;
+  --theme-bg-dark: #3b0764;
+  --theme-text: #f3e8ff;
+  --theme-text-light: #faf5ff;
+  --theme-border: rgba(192, 132, 252, 0.3);
+}
+
+/* Mint theme - Mint Green cute aesthetic */
+.theme-mint {
+  --theme-primary: #14b8a6;
+  --theme-secondary: #5eead4;
+  --theme-accent: #0d9488;
+  --theme-bg-light: #f0fdfa;
+  --theme-bg-medium: #ccfbf1;
+  --theme-bg-dark: #134e4a;
+  --theme-text: #0f766e;
+  --theme-text-light: #14b8a6;
+  --theme-border: rgba(20, 184, 166, 0.2);
+}
+
+.theme-mint.dark {
+  --theme-primary: #5eead4;
+  --theme-secondary: #14b8a6;
+  --theme-accent: #99f6e4;
+  --theme-bg-light: #134e4a;
+  --theme-bg-medium: #0f766e;
+  --theme-bg-dark: #042f2e;
+  --theme-text: #ccfbf1;
+  --theme-text-light: #f0fdfa;
+  --theme-border: rgba(94, 234, 212, 0.3);
+}
+
+/* Pastel theme - Soft pastel colors */
+.theme-pastel {
+  --theme-primary: #f0a9d0;
+  --theme-secondary: #f8c5e6;
+  --theme-accent: #e8a4d4;
+  --theme-bg-light: #fef7ff;
+  --theme-bg-medium: #fdf2f8;
+  --theme-bg-dark: #831843;
+  --theme-text: #be185d;
+  --theme-text-light: #ec4899;
+  --theme-border: rgba(240, 169, 208, 0.3);
+}
+
+.theme-pastel.dark {
+  --theme-primary: #f8c5e6;
+  --theme-secondary: #f0a9d0;
+  --theme-accent: #fce7f3;
+  --theme-bg-light: #831843;
+  --theme-bg-medium: #9d174d;
+  --theme-bg-dark: #500724;
+  --theme-text: #fdf2f8;
+  --theme-text-light: #fef7ff;
+  --theme-border: rgba(248, 197, 230, 0.3);
+}
+
+/* Vintage theme - Warm vintage colors */
+.theme-vintage {
+  --theme-primary: #d97706;
+  --theme-secondary: #f59e0b;
+  --theme-accent: #b45309;
+  --theme-bg-light: #fffbeb;
+  --theme-bg-medium: #fef3c7;
+  --theme-bg-dark: #78350f;
+  --theme-text: #92400e;
+  --theme-text-light: #d97706;
+  --theme-border: rgba(217, 119, 6, 0.2);
+}
+
+.theme-vintage.dark {
+  --theme-primary: #f59e0b;
+  --theme-secondary: #d97706;
+  --theme-accent: #fbbf24;
+  --theme-bg-light: #78350f;
+  --theme-bg-medium: #92400e;
+  --theme-bg-dark: #451a03;
+  --theme-text: #fef3c7;
+  --theme-text-light: #fffbeb;
+  --theme-border: rgba(245, 158, 11, 0.3);
+}
+
+/* Sakura theme - Cherry blossom pink */
+.theme-sakura {
+  --theme-primary: #f472b6;
+  --theme-secondary: #f9a8d4;
+  --theme-accent: #ec4899;
+  --theme-bg-light: #fdf2f8;
+  --theme-bg-medium: #fce7f3;
+  --theme-bg-dark: #831843;
+  --theme-text: #be185d;
+  --theme-text-light: #ec4899;
+  --theme-border: rgba(244, 114, 182, 0.25);
+}
+
+.theme-sakura.dark {
+  --theme-primary: #f9a8d4;
+  --theme-secondary: #f472b6;
+  --theme-accent: #fbcfe8;
+  --theme-bg-light: #831843;
+  --theme-bg-medium: #9d174d;
+  --theme-bg-dark: #500724;
+  --theme-text: #fce7f3;
+  --theme-text-light: #fdf2f8;
+  --theme-border: rgba(249, 168, 212, 0.3);
+}
+
+/* ============================================
+   GENERIC THEME STYLES (applies to all themes)
+   ============================================ */
+
+/* Theme buttons */
+[class*="theme-"] button.btn-primary,
+[class*="theme-"] button[data-variant="primary"],
 .theme-pink button.btn-primary,
-.theme-pink button[data-variant="primary"] {
-  background-color: var(--pink-primary);
+.theme-pink button[data-variant="primary"],
+.theme-ocean button.btn-primary,
+.theme-ocean button[data-variant="primary"],
+.theme-forest button.btn-primary,
+.theme-forest button[data-variant="primary"],
+.theme-sunset button.btn-primary,
+.theme-sunset button[data-variant="primary"],
+.theme-lavender button.btn-primary,
+.theme-lavender button[data-variant="primary"],
+.theme-mint button.btn-primary,
+.theme-mint button[data-variant="primary"],
+.theme-pastel button.btn-primary,
+.theme-pastel button[data-variant="primary"],
+.theme-vintage button.btn-primary,
+.theme-vintage button[data-variant="primary"],
+.theme-sakura button.btn-primary,
+.theme-sakura button[data-variant="primary"] {
+  background-color: var(--theme-primary);
   color: white;
   border-radius: 9999px;
 }
 
+[class*="theme-"] button.btn-outline,
+[class*="theme-"] button[data-variant="outline"],
 .theme-pink button.btn-outline,
-.theme-pink button[data-variant="outline"] {
-  border-color: var(--pink-primary);
-  color: var(--pink-primary);
+.theme-pink button[data-variant="outline"],
+.theme-ocean button.btn-outline,
+.theme-ocean button[data-variant="outline"],
+.theme-forest button.btn-outline,
+.theme-forest button[data-variant="outline"],
+.theme-sunset button.btn-outline,
+.theme-sunset button[data-variant="outline"],
+.theme-lavender button.btn-outline,
+.theme-lavender button[data-variant="outline"],
+.theme-mint button.btn-outline,
+.theme-mint button[data-variant="outline"],
+.theme-pastel button.btn-outline,
+.theme-pastel button[data-variant="outline"],
+.theme-vintage button.btn-outline,
+.theme-vintage button[data-variant="outline"],
+.theme-sakura button.btn-outline,
+.theme-sakura button[data-variant="outline"] {
+  border-color: var(--theme-primary);
+  color: var(--theme-primary);
   border-radius: 9999px;
 }
 
-/* Pink theme cards */
-.theme-pink .card {
+/* Theme cards */
+[class*="theme-"] .card,
+.theme-pink .card,
+.theme-ocean .card,
+.theme-forest .card,
+.theme-sunset .card,
+.theme-lavender .card,
+.theme-mint .card,
+.theme-pastel .card,
+.theme-vintage .card,
+.theme-sakura .card {
   border-radius: 1rem;
-  box-shadow: 0 4px 10px -1px rgba(244, 114, 182, 0.2), 0 2px 6px -1px rgba(244, 114, 182, 0.15);
-  border: 1px solid rgba(244, 114, 182, 0.2);
+  box-shadow: 0 4px 10px -1px var(--theme-border), 0 2px 6px -1px var(--theme-border);
+  border: 1px solid var(--theme-border);
 }
 
-/* Pink theme headers */
-.theme-pink h1,
-.theme-pink h2,
-.theme-pink h3,
-.theme-pink h4,
-.theme-pink h5,
-.theme-pink h6 {
-  color: var(--pink-primary);
+/* Theme headers */
+[class*="theme-"] h1,
+[class*="theme-"] h2,
+[class*="theme-"] h3,
+[class*="theme-"] h4,
+[class*="theme-"] h5,
+[class*="theme-"] h6,
+.theme-pink h1, .theme-pink h2, .theme-pink h3, .theme-pink h4, .theme-pink h5, .theme-pink h6,
+.theme-ocean h1, .theme-ocean h2, .theme-ocean h3, .theme-ocean h4, .theme-ocean h5, .theme-ocean h6,
+.theme-forest h1, .theme-forest h2, .theme-forest h3, .theme-forest h4, .theme-forest h5, .theme-forest h6,
+.theme-sunset h1, .theme-sunset h2, .theme-sunset h3, .theme-sunset h4, .theme-sunset h5, .theme-sunset h6,
+.theme-lavender h1, .theme-lavender h2, .theme-lavender h3, .theme-lavender h4, .theme-lavender h5, .theme-lavender h6,
+.theme-mint h1, .theme-mint h2, .theme-mint h3, .theme-mint h4, .theme-mint h5, .theme-mint h6,
+.theme-pastel h1, .theme-pastel h2, .theme-pastel h3, .theme-pastel h4, .theme-pastel h5, .theme-pastel h6,
+.theme-vintage h1, .theme-vintage h2, .theme-vintage h3, .theme-vintage h4, .theme-vintage h5, .theme-vintage h6,
+.theme-sakura h1, .theme-sakura h2, .theme-sakura h3, .theme-sakura h4, .theme-sakura h5, .theme-sakura h6 {
+  color: var(--theme-primary);
 }
 
-/* Pink theme links */
-.theme-pink a {
-  color: var(--pink-primary);
+/* Theme links */
+[class*="theme-"] a,
+.theme-pink a,
+.theme-ocean a,
+.theme-forest a,
+.theme-sunset a,
+.theme-lavender a,
+.theme-mint a,
+.theme-pastel a,
+.theme-vintage a,
+.theme-sakura a {
+  color: var(--theme-primary);
 }
 
-.theme-pink a:hover {
-  color: var(--pink-secondary);
+[class*="theme-"] a:hover,
+.theme-pink a:hover,
+.theme-ocean a:hover,
+.theme-forest a:hover,
+.theme-sunset a:hover,
+.theme-lavender a:hover,
+.theme-mint a:hover,
+.theme-pastel a:hover,
+.theme-vintage a:hover,
+.theme-sakura a:hover {
+  color: var(--theme-secondary);
 }
 
-/* Pink theme navigation and sidebar */
-.theme-pink nav,
-.theme-pink aside {
-  background-color: white;
-  border-color: var(--pink-medium);
+/* Theme navigation and sidebar */
+[class*="theme-"] nav,
+[class*="theme-"] aside,
+.theme-pink nav, .theme-pink aside,
+.theme-ocean nav, .theme-ocean aside,
+.theme-forest nav, .theme-forest aside,
+.theme-sunset nav, .theme-sunset aside,
+.theme-lavender nav, .theme-lavender aside,
+.theme-mint nav, .theme-mint aside,
+.theme-pastel nav, .theme-pastel aside,
+.theme-vintage nav, .theme-vintage aside,
+.theme-sakura nav, .theme-sakura aside {
+  background-color: var(--theme-bg-light);
+  border-color: var(--theme-border);
 }
 
-.theme-pink nav a.active,
-.theme-pink aside a.active {
-  background-color: var(--pink-medium);
-  color: var(--pink-primary);
+[class*="theme-"].dark nav,
+[class*="theme-"].dark aside,
+.theme-pink.dark nav, .theme-pink.dark aside,
+.theme-ocean.dark nav, .theme-ocean.dark aside,
+.theme-forest.dark nav, .theme-forest.dark aside,
+.theme-sunset.dark nav, .theme-sunset.dark aside,
+.theme-lavender.dark nav, .theme-lavender.dark aside,
+.theme-mint.dark nav, .theme-mint.dark aside,
+.theme-pastel.dark nav, .theme-pastel.dark aside,
+.theme-vintage.dark nav, .theme-vintage.dark aside,
+.theme-sakura.dark nav, .theme-sakura.dark aside {
+  background-color: var(--theme-bg-medium);
 }
 
-/* Pink theme inputs */
-.theme-pink input,
-.theme-pink select,
-.theme-pink textarea {
+[class*="theme-"] nav a.active,
+[class*="theme-"] aside a.active,
+.theme-pink nav a.active, .theme-pink aside a.active,
+.theme-ocean nav a.active, .theme-ocean aside a.active,
+.theme-forest nav a.active, .theme-forest aside a.active,
+.theme-sunset nav a.active, .theme-sunset aside a.active,
+.theme-lavender nav a.active, .theme-lavender aside a.active,
+.theme-mint nav a.active, .theme-mint aside a.active,
+.theme-pastel nav a.active, .theme-pastel aside a.active,
+.theme-vintage nav a.active, .theme-vintage aside a.active,
+.theme-sakura nav a.active, .theme-sakura aside a.active {
+  background-color: var(--theme-bg-medium);
+  color: var(--theme-primary);
+}
+
+/* Theme inputs */
+[class*="theme-"] input,
+[class*="theme-"] select,
+[class*="theme-"] textarea,
+.theme-pink input, .theme-pink select, .theme-pink textarea,
+.theme-ocean input, .theme-ocean select, .theme-ocean textarea,
+.theme-forest input, .theme-forest select, .theme-forest textarea,
+.theme-sunset input, .theme-sunset select, .theme-sunset textarea,
+.theme-lavender input, .theme-lavender select, .theme-lavender textarea,
+.theme-mint input, .theme-mint select, .theme-mint textarea,
+.theme-pastel input, .theme-pastel select, .theme-pastel textarea,
+.theme-vintage input, .theme-vintage select, .theme-vintage textarea,
+.theme-sakura input, .theme-sakura select, .theme-sakura textarea {
   border-radius: 0.75rem;
-  border-color: var(--pink-secondary);
+  border-color: var(--theme-secondary);
 }
 
-.theme-pink input:focus,
-.theme-pink select:focus,
-.theme-pink textarea:focus {
-  border-color: var(--pink-primary);
-  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2);
+[class*="theme-"] input:focus,
+[class*="theme-"] select:focus,
+[class*="theme-"] textarea:focus,
+.theme-pink input:focus, .theme-pink select:focus, .theme-pink textarea:focus,
+.theme-ocean input:focus, .theme-ocean select:focus, .theme-ocean textarea:focus,
+.theme-forest input:focus, .theme-forest select:focus, .theme-forest textarea:focus,
+.theme-sunset input:focus, .theme-sunset select:focus, .theme-sunset textarea:focus,
+.theme-lavender input:focus, .theme-lavender select:focus, .theme-lavender textarea:focus,
+.theme-mint input:focus, .theme-mint select:focus, .theme-mint textarea:focus,
+.theme-pastel input:focus, .theme-pastel select:focus, .theme-pastel textarea:focus,
+.theme-vintage input:focus, .theme-vintage select:focus, .theme-vintage textarea:focus,
+.theme-sakura input:focus, .theme-sakura select:focus, .theme-sakura textarea:focus {
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 2px var(--theme-border);
 }
 
 /* Pink theme decorations */
@@ -170,14 +512,32 @@ body, html {
   background: #6b7280;
 }
 
-/* Pink theme scrollbar */
-.theme-pink::-webkit-scrollbar-thumb {
-  background: var(--pink-secondary);
+/* Theme scrollbars */
+[class*="theme-"]::-webkit-scrollbar-thumb,
+.theme-pink::-webkit-scrollbar-thumb,
+.theme-ocean::-webkit-scrollbar-thumb,
+.theme-forest::-webkit-scrollbar-thumb,
+.theme-sunset::-webkit-scrollbar-thumb,
+.theme-lavender::-webkit-scrollbar-thumb,
+.theme-mint::-webkit-scrollbar-thumb,
+.theme-pastel::-webkit-scrollbar-thumb,
+.theme-vintage::-webkit-scrollbar-thumb,
+.theme-sakura::-webkit-scrollbar-thumb {
+  background: var(--theme-secondary);
   border-radius: 4px;
 }
 
-.theme-pink::-webkit-scrollbar-thumb:hover {
-  background: var(--pink-primary);
+[class*="theme-"]::-webkit-scrollbar-thumb:hover,
+.theme-pink::-webkit-scrollbar-thumb:hover,
+.theme-ocean::-webkit-scrollbar-thumb:hover,
+.theme-forest::-webkit-scrollbar-thumb:hover,
+.theme-sunset::-webkit-scrollbar-thumb:hover,
+.theme-lavender::-webkit-scrollbar-thumb:hover,
+.theme-mint::-webkit-scrollbar-thumb:hover,
+.theme-pastel::-webkit-scrollbar-thumb:hover,
+.theme-vintage::-webkit-scrollbar-thumb:hover,
+.theme-sakura::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-primary);
 }
 
 /* Set base styles for page content containers */

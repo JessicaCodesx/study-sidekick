@@ -26,19 +26,28 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
           initial={{ x: -300, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: -300, opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          transition={{ 
+            type: 'spring',
+            stiffness: 300,
+            damping: 30,
+            mass: 0.8
+          }}
           className="w-64 h-full glass dark:glass-dark theme-pink:bg-pink-50/80 border-r border-white/20 dark:border-gray-700/50 theme-pink:border-pink-200/50 overflow-y-auto flex-shrink-0 backdrop-blur-xl"
         >
           <nav className="p-4 h-full flex flex-col">
             <div>
               <ul className="space-y-1 mb-6">
-                <li>
+                <motion.li
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
                   <NavLink
                     to="/dashboard"
                     className={({ isActive }) =>
-                      `flex items-center py-2 px-3 rounded-lg ${
+                      `flex items-center py-2 px-3 rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700'
+                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700 shadow-md'
                           : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }
@@ -59,15 +68,19 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     </svg>
                     Dashboard
                   </NavLink>
-                </li>
+                </motion.li>
                 
-                <li>
+                <motion.li
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15 }}
+                >
                   <NavLink
                     to="/courses"
                     className={({ isActive }) =>
-                      `flex items-center py-2 px-3 rounded-lg ${
+                      `flex items-center py-2 px-3 rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700'
+                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700 shadow-md'
                           : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }
@@ -88,15 +101,19 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     </svg>
                     Courses
                   </NavLink>
-                </li>
+                </motion.li>
                 
-                <li>
+                <motion.li
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
                   <NavLink
                     to="/calendar"
                     className={({ isActive }) =>
-                      `flex items-center py-2 px-3 rounded-lg ${
+                      `flex items-center py-2 px-3 rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700'
+                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700 shadow-md'
                           : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }
@@ -117,15 +134,19 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     </svg>
                     Calendar
                   </NavLink>
-                </li>
+                </motion.li>
                 
-                <li>
+                <motion.li
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.25 }}
+                >
                   <NavLink
                     to="/academic-records"
                     className={({ isActive }) =>
-                      `flex items-center py-2 px-3 rounded-lg ${
+                      `flex items-center py-2 px-3 rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700'
+                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700 shadow-md'
                           : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }
@@ -181,7 +202,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     </svg>
                     Settings
                   </NavLink>
-                </li>
+                </motion.li>
               </ul>
             </div>
             

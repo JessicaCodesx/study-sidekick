@@ -34,40 +34,53 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install web dependencies only
         run: |
-          # Install web dependencies directly, avoiding React Native packages
-          # Core React
-          npm install react@^18.2.0 react-dom@^18.2.0 --legacy-peer-deps --save || exit 1
+          # Backup original package.json
+          cp package.json package.json.backup
           
-          # Routing and UI
-          npm install react-router-dom@^6.20.0 framer-motion@^10.16.0 classnames@^2.3.2 uuid@^9.0.1 --legacy-peer-deps --save || exit 1
+          # Create minimal package.json for web build (no React Native dependencies)
+          cat > package.json << 'EOF'
+          {
+            "name": "study-sidekick-web",
+            "version": "1.0.0",
+            "type": "module",
+            "scripts": {
+              "build:web": "vite build"
+            },
+            "dependencies": {
+              "react": "^18.2.0",
+              "react-dom": "^18.2.0",
+              "react-router-dom": "^6.20.0",
+              "framer-motion": "^10.16.0",
+              "classnames": "^2.3.2",
+              "uuid": "^9.0.1"
+            },
+            "devDependencies": {
+              "@types/react": "^18.2.0",
+              "@types/react-dom": "^18.2.0",
+              "@types/node": "^20.0.0",
+              "@types/uuid": "^9.0.1",
+              "@vitejs/plugin-react": "^4.2.0",
+              "vite": "^5.0.0",
+              "typescript": "^5.3.0",
+              "tailwindcss": "^3.4.0",
+              "postcss": "^8.4.0",
+              "autoprefixer": "^10.4.0",
+              "@tailwindcss/forms": "^0.5.0"
+            }
+          }
+          EOF
           
-          # Build tools
-          npm install --save-dev vite@^5.0.0 @vitejs/plugin-react@^4.2.0 typescript@^5.3.0 --legacy-peer-deps || exit 1
+          # Remove package-lock.json if it exists (to avoid conflicts)
+          rm -f package-lock.json
           
-          # Type definitions
-          npm install --save-dev @types/react@^18.2.0 @types/react-dom@^18.2.0 @types/node@^20.0.0 @types/uuid@^9.0.1 --legacy-peer-deps || exit 1
+          # Install web dependencies only
+          npm install --legacy-peer-deps
           
-          # Styling
-          npm install --save-dev tailwindcss@^3.4.0 postcss@^8.4.0 autoprefixer@^10.4.0 @tailwindcss/forms@^0.5.0 --legacy-peer-deps || exit 1
-          
-          # Create stub packages to prevent import errors (they won't be used in web build since isMobile=false)
-          mkdir -p node_modules/@react-navigation/{drawer,native,stack}
-          for dir in drawer native stack; do
-            echo '{"name":"@react-navigation/'$dir'","version":"6.0.0","main":"index.js"}' > node_modules/@react-navigation/$dir/package.json
-            echo 'module.exports = {};' > node_modules/@react-navigation/$dir/index.js
-          done
-          
-          # Stub React Native packages
-          mkdir -p node_modules/{expo,react-native,@react-native-community}
-          echo '{"name":"expo","version":"51.0.0","main":"index.js"}' > node_modules/expo/package.json
-          echo 'module.exports = {};' > node_modules/expo/index.js
-          echo '{"name":"react-native","version":"0.74.0","main":"index.js"}' > node_modules/react-native/package.json
-          echo 'module.exports = {};' > node_modules/react-native/index.js
+          # Verify critical packages are installed
+          npm list react react-dom vite || echo "Warning: Some packages may be missing"
 
       - name: Build for production
         run: npm run build:web

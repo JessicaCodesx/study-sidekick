@@ -1,13 +1,28 @@
 // ThemeContext.tsx - Web version
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Theme = 'light' | 'dark' | 'system' | 'pink';
+export type ThemeName = 
+  | 'light' 
+  | 'dark' 
+  | 'system' 
+  | 'pink'
+  | 'ocean'
+  | 'forest'
+  | 'sunset'
+  | 'lavender'
+  | 'mint'
+  | 'pastel'
+  | 'vintage'
+  | 'sakura';
+
+export type Theme = ThemeName;
 
 interface ThemeContextValue {
   darkMode: boolean;
   theme: Theme;
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
+  setDarkMode: (dark: boolean) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
@@ -15,6 +30,7 @@ const ThemeContext = createContext<ThemeContextValue>({
   theme: 'system',
   toggleTheme: () => {},
   setTheme: () => {},
+  setDarkMode: () => {},
 });
 
 export const useTheme = () => useContext(ThemeContext);
@@ -44,16 +60,26 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const darkMode = theme === 'dark' || (theme === 'system' && systemColorScheme === 'dark');
 
   const toggleTheme = () => {
-    setThemeState(prev => prev === 'dark' ? 'light' : 'dark');
+    setDarkMode(!darkMode);
   };
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
+    // If switching to system, use system preference
+    if (newTheme === 'system') {
+      setSystemColorScheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+  };
+
+  const setDarkMode = (dark: boolean) => {
+    // This will be handled by the parent component
   };
 
   return (
-    <ThemeContext.Provider value={{ darkMode, theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ darkMode, theme, toggleTheme, setTheme, setDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );
 }
+
+export default ThemeContext;

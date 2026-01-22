@@ -1,8 +1,4 @@
-// Platform-specific database exports
-import { isMobile } from './platform';
-
-// Web implementation using IndexedDB
-// For web builds, isMobile is always false, so we implement IndexedDB here
+// Web database implementation using IndexedDB
 const DB_NAME = 'studySidekickDB';
 const DB_VERSION = 1;
 

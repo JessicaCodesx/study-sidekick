@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import classNames from 'classnames';
 
 interface CardProps {
@@ -8,6 +9,9 @@ interface CardProps {
   padding?: 'none' | 'sm' | 'md' | 'lg';
   variant?: 'default' | 'hover' | 'interactive';
   border?: boolean;
+  delay?: number;
+  whileHover?: any;
+  whileTap?: any;
 }
 
 const Card = ({
@@ -17,6 +21,9 @@ const Card = ({
   padding = 'md',
   variant = 'default',
   border = true,
+  delay = 0,
+  whileHover,
+  whileTap,
 }: CardProps) => {
   const baseClasses = 'glass dark:glass-dark rounded-2xl card-glow';
   
@@ -43,10 +50,33 @@ const Card = ({
     className
   );
   
+  const defaultHover = variant !== 'default' 
+    ? { scale: 1.02, y: -4, transition: { type: 'spring', stiffness: 400, damping: 17 } }
+    : {};
+  const defaultTap = variant !== 'default'
+    ? { scale: 0.98 }
+    : {};
+  
+  const MotionCard = motion.div;
+  
   return (
-    <div className={cardClasses} onClick={onClick}>
+    <MotionCard
+      className={cardClasses}
+      onClick={onClick}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ 
+        duration: 0.4, 
+        delay,
+        type: 'spring',
+        stiffness: 100,
+        damping: 15
+      }}
+      whileHover={whileHover || defaultHover}
+      whileTap={whileTap || defaultTap}
+    >
       {children}
-    </div>
+    </MotionCard>
   );
 };
 

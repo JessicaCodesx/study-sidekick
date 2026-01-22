@@ -51,15 +51,38 @@
   }
 
   .card-glow-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .card-glow-hover:hover {
     box-shadow: 
-      0 0 30px rgba(139, 92, 246, 0.2),
-      0 0 60px rgba(139, 92, 246, 0.1),
-      0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+      0 0 40px rgba(139, 92, 246, 0.25),
+      0 0 80px rgba(139, 92, 246, 0.15),
+      0 15px 25px -5px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px) scale(1.01);
+  }
+  
+  /* Smooth transitions for interactive elements */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Enhanced hover effects */
+  .hover-lift {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+  }
+  
+  /* Glow effect on hover */
+  .hover-glow {
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .hover-glow:hover {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
   }
 
   /* Gradient text */
@@ -126,7 +149,39 @@
   @apply w-full h-full;
 }
 
-/* Pink theme overrides */
+/* Theme-specific body backgrounds */
 .theme-pink body {
   @apply bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 dark:from-pink-950 dark:via-rose-900 dark:to-purple-950;
+}
+
+.theme-ocean body {
+  @apply bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 dark:from-cyan-950 dark:via-blue-900 dark:to-teal-950;
+}
+
+.theme-forest body {
+  @apply bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950 dark:via-green-900 dark:to-teal-950;
+}
+
+.theme-sunset body {
+  @apply bg-gradient-to-br from-orange-50 via-amber-50 to-pink-50 dark:from-orange-950 dark:via-amber-900 dark:to-pink-950;
+}
+
+.theme-lavender body {
+  @apply bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 dark:from-purple-950 dark:via-violet-900 dark:to-fuchsia-950;
+}
+
+.theme-mint body {
+  @apply bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-50 dark:from-teal-950 dark:via-emerald-900 dark:to-cyan-950;
+}
+
+.theme-pastel body {
+  @apply bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 dark:from-pink-950 dark:via-rose-900 dark:to-purple-950;
+}
+
+.theme-vintage body {
+  @apply bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950 dark:via-yellow-900 dark:to-orange-950;
+}
+
+.theme-sakura body {
+  @apply bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 dark:from-rose-950 dark:via-pink-900 dark:to-fuchsia-950;
 }

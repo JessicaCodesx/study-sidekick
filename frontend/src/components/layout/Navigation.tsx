@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import ThemeContext from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useAppContext } from '../../context/AppContext';
@@ -42,7 +43,12 @@ const Navigation = ({ isSidebarOpen, toggleSidebar }: NavigationProps) => {
   };
 
   return (
-    <header className="glass dark:glass-dark border-b border-white/20 dark:border-gray-700/50 sticky top-0 z-10 w-full backdrop-blur-xl">
+    <motion.header 
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+      className="glass dark:glass-dark border-b border-white/20 dark:border-gray-700/50 sticky top-0 z-10 w-full backdrop-blur-xl"
+    >
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
           <button
@@ -248,7 +254,7 @@ const Navigation = ({ isSidebarOpen, toggleSidebar }: NavigationProps) => {
           </div>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 };
 

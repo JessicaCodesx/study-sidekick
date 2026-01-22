@@ -1,4 +1,4 @@
-# 🚀 Deployment & Update Guide
+# 🚀 Deployment & Desktop App Update Guide
 
 ## GitHub Pages Auto-Deployment
 
