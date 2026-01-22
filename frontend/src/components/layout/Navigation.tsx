@@ -162,7 +162,7 @@ const Navigation = ({ isSidebarOpen, toggleSidebar }: NavigationProps) => {
             </button>
             
             {/* Dropdown Menu */}
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 theme-pink:bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+            <div className="absolute right-0 mt-2 w-56 glass dark:glass-dark rounded-2xl shadow-2xl py-2 z-10 hidden group-hover:block border border-white/20 dark:border-gray-700/30 backdrop-blur-2xl">
               {currentUser && (
                 <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 theme-pink:text-pink-700 border-b border-gray-200 dark:border-gray-700 theme-pink:border-pink-200">
                   <div className="font-medium truncate">{currentUser.displayName || currentUser.email}</div>

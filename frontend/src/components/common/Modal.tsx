@@ -59,34 +59,40 @@ const Modal = ({
         <div className="fixed inset-0 z-[100] overflow-y-auto">
           <motion.div
             ref={overlayRef}
-            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={handleOverlayClick}
           >
             <motion.div
               className={classNames(
-                'bg-white dark:bg-gray-800 rounded shadow-xl w-full mx-auto',
+                'glass dark:glass-dark rounded-3xl shadow-2xl w-full mx-auto border border-white/20 dark:border-gray-700/30',
                 sizeClasses[size]
               )}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', duration: 0.3 }}
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ 
+                type: 'spring', 
+                stiffness: 300, 
+                damping: 30,
+                duration: 0.4
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               {(title || showCloseButton) && (
-                <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 p-4">
+                <div className="flex justify-between items-center border-b border-gray-200/50 dark:border-gray-700/50 p-6 bg-gradient-to-r from-transparent via-gray-50/50 to-transparent dark:via-gray-800/50">
                   {title && (
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white gradient-text">
                       {title}
                     </h3>
                   )}
                   {showCloseButton && (
                     <button
                       onClick={onClose}
-                      className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white focus:outline-none"
+                      className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-110"
                       aria-label="Close"
                     >
                       <svg
@@ -107,7 +113,7 @@ const Modal = ({
                   )}
                 </div>
               )}
-              <div className="p-4">{children}</div>
+              <div className="p-6">{children}</div>
             </motion.div>
           </motion.div>
         </div>

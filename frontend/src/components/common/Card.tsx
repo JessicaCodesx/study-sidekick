@@ -25,7 +25,7 @@ const Card = ({
   whileHover,
   whileTap,
 }: CardProps) => {
-  const baseClasses = 'glass dark:glass-dark rounded-2xl card-glow';
+  const baseClasses = 'glass dark:glass-dark rounded-3xl card-glow';
   
   const paddingClasses = {
     none: '',
@@ -104,7 +104,7 @@ export const CardTitle = ({
   className?: string;
 }) => {
   return (
-    <h3 className={classNames('text-xl font-bold text-gray-900 dark:text-white gradient-text', className)}>
+    <h3 className={classNames('text-2xl font-extrabold text-gray-900 dark:text-white gradient-text tracking-tight', className)}>
       {children}
     </h3>
   );
