@@ -1,65 +1,50 @@
-// NotesPage.tsx - Full React Native version with CRUD operations
+// NotesPage.tsx - Web version with note management
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  TextInput, 
-  Modal,
-  Alert,
-  FlatList 
-} from 'react-native';
-import { Card, Button } from 'react-native-paper';
+import { useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAppContext } from '../context/AppContext';
 import { Note, Course } from '../lib/types';
-import { add, update, remove, getNotesByCourse } from '../lib/db';
-import { generateId, getCurrentTimestamp } from '../lib/utils';
+import { add, update, remove, getAll } from '../lib/db';
+import { generateId, getCurrentTimestamp, formatDate } from '../lib/utils';
+import Card, { CardTitle, CardContent } from '../components/common/Card';
+import Button from '../components/common/Button';
+import Modal from '../components/common/Modal';
+import NoteEditor from '../components/notes/NoteEditor';
+import UnitAccordion from '../components/notes/UnitAccordion';
 
-export default function NotesPage() {
+const NotesPage = () => {
+  const { courseId } = useParams<{ courseId: string }>();
   const { state, dispatch } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [noteTitle, setNoteTitle] = useState('');
-  const [noteContent, setNoteContent] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState<string>('');
+  const [selectedUnit, setSelectedUnit] = useState<string>('');
 
-  const handleAddNote = () => {
+  const course = state.courses.find(c => c.id === courseId);
+  const courseUnits = state.units.filter(u => u.courseId === courseId);
+  const courseNotes = state.notes.filter(n => n.courseId === courseId);
+
+  const handleAddNote = (unitId: string) => {
     setEditingNote(null);
-    setNoteTitle('');
-    setNoteContent('');
-    setSelectedCourse('');
+    setSelectedUnit(unitId);
     setShowModal(true);
   };
 
   const handleEditNote = (note: Note) => {
     setEditingNote(note);
-    setNoteTitle(note.title);
-    setNoteContent(note.content);
-    setSelectedCourse(note.courseId);
+    setSelectedUnit(note.unitId);
     setShowModal(true);
   };
 
-  const handleSaveNote = async () => {
-    if (!noteTitle.trim()) {
-      Alert.alert('Error', 'Please enter a note title');
-      return;
-    }
-
-    if (!selectedCourse) {
-      Alert.alert('Error', 'Please select a course');
-      return;
-    }
-
+  const handleSaveNote = async (noteData: { title: string; content: string; unitId: string }) => {
     try {
       const now = getCurrentTimestamp();
       
       if (editingNote) {
         const updatedNote: Note = {
           ...editingNote,
-          title: noteTitle,
-          content: noteContent,
+          title: noteData.title,
+          content: noteData.content,
+          unitId: noteData.unitId,
           updatedAt: now,
         };
         await update('notes', updatedNote);
@@ -67,10 +52,10 @@ export default function NotesPage() {
       } else {
         const newNote: Note = {
           id: generateId(),
-          title: noteTitle,
-          content: noteContent,
-          courseId: selectedCourse,
-          unitId: '', // Could add unit selection later
+          title: noteData.title,
+          content: noteData.content,
+          courseId: courseId!,
+          unitId: noteData.unitId,
           createdAt: now,
           updatedAt: now,
         };
@@ -81,384 +66,170 @@ export default function NotesPage() {
       setShowModal(false);
     } catch (error) {
       console.error('Error saving note:', error);
-      Alert.alert('Error', 'Failed to save note');
+      alert('Failed to save note');
     }
   };
 
-  const handleDeleteNote = (note: Note) => {
-    Alert.alert(
-      'Delete Note',
-      `Are you sure you want to delete "${note.title}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await remove('notes', note.id);
-              dispatch({ type: 'DELETE_NOTE', payload: note.id });
-            } catch (error) {
-              console.error('Error deleting note:', error);
-              Alert.alert('Error', 'Failed to delete note');
-            }
-          },
-        },
-      ]
-    );
+  const handleDeleteNote = async (note: Note) => {
+    if (confirm(`Are you sure you want to delete "${note.title}"?`)) {
+      try {
+        await remove('notes', note.id);
+        dispatch({ type: 'DELETE_NOTE', payload: note.id });
+      } catch (error) {
+        console.error('Error deleting note:', error);
+        alert('Failed to delete note');
+      }
+    }
   };
 
-  const renderNoteCard = (note: Note) => {
-    const course = state.courses.find(c => c.id === note.courseId);
-    
+  if (!course) {
     return (
-      <Card key={note.id} style={styles.card}>
-        <Card.Content>
-          <View style={styles.noteHeader}>
-            <View style={styles.noteInfo}>
-              {course && (
-                <View style={[styles.courseBadge, { backgroundColor: course.colorTheme || '#7C3AED' }]}>
-                  <Text style={styles.courseBadgeText}>{course.name}</Text>
-                </View>
-              )}
-              <Text style={styles.noteTitle}>{note.title}</Text>
-            </View>
-            <View style={styles.noteActions}>
-              <TouchableOpacity onPress={() => handleEditNote(note)} style={styles.actionBtn}>
-                <Text style={styles.actionText}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleDeleteNote(note)} style={[styles.actionBtn, styles.deleteBtn]}>
-                <Text style={[styles.actionText, styles.deleteText]}>Del</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <Text style={styles.noteContent} numberOfLines={3}>
-            {note.content || 'No content'}
-          </Text>
-          <Text style={styles.noteDate}>
-            {new Date(note.updatedAt).toLocaleDateString()}
-          </Text>
-        </Card.Content>
-      </Card>
+      <div className="notes-container p-6">
+        <Card>
+          <CardContent className="text-center py-12">
+            <p className="text-lg text-gray-600 dark:text-gray-400">Course not found</p>
+          </CardContent>
+        </Card>
+      </div>
     );
-  };
-
-  const courses = state.courses.filter(c => !c.isArchived);
+  }
 
   return (
-    <>
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Notes</Text>
-          <Text style={styles.headerSubtitle}>
-            {state.notes.length} notes
-          </Text>
-        </View>
+    <div className="notes-container p-6 overflow-y-auto custom-scrollbar">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-7xl mx-auto"
+      >
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-extrabold mb-2">
+            <span className="gradient-text">{course.name} - Notes</span>
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            Organize your notes by units and modules
+          </p>
+        </div>
 
-        {/* Notes List */}
-        {state.notes.length > 0 ? (
-          state.notes.map(renderNoteCard)
+        {/* Units with Notes */}
+        {courseUnits.length > 0 ? (
+          <div className="space-y-6">
+            {courseUnits.map((unit, index) => {
+              const unitNotes = courseNotes.filter(n => n.unitId === unit.id);
+              return (
+                <motion.div
+                  key={unit.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <UnitAccordion
+                    unit={unit}
+                    notes={unitNotes}
+                    onAddNote={() => handleAddNote(unit.id)}
+                    onEditNote={handleEditNote}
+                    onDeleteNote={handleDeleteNote}
+                  />
+                </motion.div>
+              );
+            })}
+          </div>
         ) : (
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text style={styles.emptyText}>No notes yet</Text>
-              <Text style={styles.emptySubtext}>Create notes for your courses</Text>
-            </Card.Content>
+          <Card>
+            <CardContent className="text-center py-12">
+              <p className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                No units yet
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-500">
+                Create units in the course settings to organize your notes
+              </p>
+            </CardContent>
           </Card>
         )}
 
-        <TouchableOpacity style={styles.addButton} onPress={handleAddNote}>
-          <Text style={styles.addButtonText}>+ Add Note</Text>
-        </TouchableOpacity>
-      </ScrollView>
-
-      {/* Note Modal */}
-      <Modal visible={showModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <Card style={styles.modalCard}>
-            <Card.Content>
-              <ScrollView>
-                <Text style={styles.modalTitle}>
-                  {editingNote ? 'Edit Note' : 'New Note'}
-                </Text>
-                
-                {/* Course Selection */}
-                {!editingNote && courses.length > 0 && (
-                  <View style={styles.courseSelector}>
-                    <Text style={styles.label}>Course</Text>
-                    <FlatList
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                      data={courses}
-                      keyExtractor={item => item.id}
-                      renderItem={({ item }) => (
-                        <TouchableOpacity
-                          style={[
-                            styles.courseOption,
-                            selectedCourse === item.id && styles.courseOptionSelected
-                          ]}
-                          onPress={() => setSelectedCourse(item.id)}
-                        >
-                          <View style={[styles.courseDot, { backgroundColor: item.colorTheme || '#7C3AED' }]} />
-                          <Text style={[
-                            styles.courseOptionText,
-                            selectedCourse === item.id && styles.courseOptionTextSelected
-                          ]}>
-                            {item.name}
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                    />
-                  </View>
-                )}
-
-                {editingNote && courses.length > 0 && (
-                  <View style={styles.selectedCourse}>
-                    <View style={[styles.courseDot, { backgroundColor: courses.find(c => c.id === selectedCourse)?.colorTheme || '#7C3AED' }]} />
-                    <Text style={styles.selectedCourseText}>
-                      {courses.find(c => c.id === selectedCourse)?.name || 'Unknown Course'}
-                    </Text>
-                  </View>
-                )}
-
-                <TextInput
-                  style={styles.input}
-                  placeholder="Note Title"
-                  value={noteTitle}
-                  onChangeText={setNoteTitle}
-                />
-                
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  placeholder="Note Content"
-                  value={noteContent}
-                  onChangeText={setNoteContent}
-                  multiline
-                  numberOfLines={10}
-                />
-
-                <View style={styles.modalActions}>
-                  <Button
-                    mode="outlined"
-                    onPress={() => setShowModal(false)}
-                    style={styles.cancelButton}
+        {/* Notes without units */}
+        {courseNotes.filter(n => !n.unitId || !courseUnits.find(u => u.id === n.unitId)).length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Other Notes</h2>
+            <div className="space-y-4">
+              {courseNotes
+                .filter(n => !n.unitId || !courseUnits.find(u => u.id === n.unitId))
+                .map((note, index) => (
+                  <motion.div
+                    key={note.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
                   >
-                    Cancel
-                  </Button>
-                  <Button
-                    mode="contained"
-                    onPress={handleSaveNote}
-                    style={styles.saveButton}
-                    buttonColor="#7C3AED"
-                  >
-                    Save
-                  </Button>
-                </View>
-              </ScrollView>
-            </Card.Content>
+                    <Card>
+                      <CardContent>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold mb-2">{note.title}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+                              {note.content || 'No content'}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                              Updated: {formatDate(note.updatedAt)}
+                            </p>
+                          </div>
+                          <div className="flex gap-2 ml-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditNote(note)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleDeleteNote(note)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {courseNotes.length === 0 && courseUnits.length > 0 && (
+          <Card>
+            <CardContent className="text-center py-12">
+              <p className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                No notes yet
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+                Click "Add Note" on a unit to get started
+              </p>
+            </CardContent>
           </Card>
-        </View>
-      </Modal>
-    </>
-  );
-}
+        )}
+      </motion.div>
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  header: {
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  card: {
-    margin: 15,
-    marginBottom: 0,
-  },
-  noteHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  noteInfo: {
-    flex: 1,
-  },
-  courseBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginBottom: 6,
-  },
-  courseBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  noteTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  noteActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  actionBtn: {
-    padding: 6,
-    borderRadius: 6,
-    backgroundColor: '#F3F4F6',
-  },
-  actionText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#7C3AED',
-  },
-  deleteBtn: {
-    backgroundColor: '#FEE2E2',
-  },
-  deleteText: {
-    color: '#EF4444',
-  },
-  noteContent: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginBottom: 8,
-    lineHeight: 20,
-  },
-  noteDate: {
-    fontSize: 12,
-    color: '#9CA3AF',
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#9CA3AF',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#9CA3AF',
-    textAlign: 'center',
-  },
-  addButton: {
-    backgroundColor: '#7C3AED',
-    margin: 15,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCard: {
-    width: '90%',
-    maxWidth: 500,
-    maxHeight: '80%',
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 20,
-  },
-  courseSelector: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 8,
-  },
-  courseOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#fff',
-    marginRight: 8,
-  },
-  courseOptionSelected: {
-    borderColor: '#7C3AED',
-    backgroundColor: '#F3F4F6',
-  },
-  courseOptionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  courseOptionTextSelected: {
-    color: '#7C3AED',
-  },
-  selectedCourse: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#F3F4F6',
-    marginBottom: 16,
-  },
-  selectedCourseText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
-    marginLeft: 8,
-  },
-  courseDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  textArea: {
-    height: 200,
-    textAlignVertical: 'top',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 8,
-  },
-  cancelButton: {
-    flex: 1,
-  },
-  saveButton: {
-    flex: 1,
-  },
-});
+      {/* Note Editor Modal */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        size="lg"
+      >
+        <NoteEditor
+          note={editingNote}
+          courseId={courseId!}
+          unitId={selectedUnit}
+          units={courseUnits}
+          onSave={handleSaveNote}
+          onCancel={() => setShowModal(false)}
+        />
+      </Modal>
+    </div>
+  );
+};
+
+export default NotesPage;

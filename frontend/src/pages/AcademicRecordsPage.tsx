@@ -1,22 +1,18 @@
-// AcademicRecordsPage.tsx - Full React Native version with GPA tracking
+// AcademicRecordsPage.tsx - Web version with GPA tracking
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  TextInput, 
-  Modal,
-  Alert 
-} from 'react-native';
-import { Card, Button } from 'react-native-paper';
+import { motion } from 'framer-motion';
 import { useAppContext } from '../context/AppContext';
 import { AcademicRecord } from '../lib/types';
 import { add, update, remove } from '../lib/db';
-import { generateId, getCurrentTimestamp } from '../lib/utils';
+import { generateId, getCurrentTimestamp, formatDate } from '../lib/utils';
+import Card, { CardTitle, CardContent } from '../components/common/Card';
+import Button from '../components/common/Button';
+import Modal from '../components/common/Modal';
+import GPAChart from '../components/academic-records/GPAChart';
+import PercentageGradeInput from '../components/academic-records/PercentageGradeInput';
+import { getGpaPoints } from '../lib/gradeUtils';
 
-export default function AcademicRecordsPage() {
+const AcademicRecordsPage = () => {
   const { state, dispatch } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AcademicRecord | null>(null);
@@ -34,23 +30,13 @@ export default function AcademicRecordsPage() {
     let totalCredits = 0;
     
     state.academicRecords.forEach(record => {
-      const points = getGradePoints(record.letterGrade || '');
+      const points = getGpaPoints(record.letterGrade || '');
       totalPoints += points * record.credits;
       totalCredits += record.credits;
     });
     
     if (totalCredits === 0) return '0.00';
     return (totalPoints / totalCredits).toFixed(2);
-  };
-
-  const getGradePoints = (grade: string): number => {
-    const gradeMap: { [key: string]: number } = {
-      'A+': 4.0, 'A': 4.0, 'A-': 3.7,
-      'B+': 3.3, 'B': 3.0, 'B-': 2.7,
-      'C+': 2.3, 'C': 2.0, 'C-': 1.7,
-      'D+': 1.3, 'D': 1.0, 'F': 0.0
-    };
-    return gradeMap[grade.toUpperCase()] || 0;
   };
 
   const handleAddRecord = () => {
@@ -77,13 +63,13 @@ export default function AcademicRecordsPage() {
 
   const handleSaveRecord = async () => {
     if (!courseName.trim() || !term.trim() || !credits.trim()) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      alert('Please fill in all required fields');
       return;
     }
 
     const creditsNum = parseFloat(credits);
     if (isNaN(creditsNum) || creditsNum <= 0) {
-      Alert.alert('Error', 'Please enter a valid number of credits');
+      alert('Please enter a valid number of credits');
       return;
     }
 
@@ -122,31 +108,20 @@ export default function AcademicRecordsPage() {
       setShowModal(false);
     } catch (error) {
       console.error('Error saving record:', error);
-      Alert.alert('Error', 'Failed to save academic record');
+      alert('Failed to save academic record');
     }
   };
 
-  const handleDeleteRecord = (record: AcademicRecord) => {
-    Alert.alert(
-      'Delete Record',
-      `Are you sure you want to delete "${record.name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await remove('academicRecords', record.id);
-              dispatch({ type: 'DELETE_ACADEMIC_RECORD', payload: record.id });
-            } catch (error) {
-              console.error('Error deleting record:', error);
-              Alert.alert('Error', 'Failed to delete record');
-            }
-          },
-        },
-      ]
-    );
+  const handleDeleteRecord = async (record: AcademicRecord) => {
+    if (confirm(`Are you sure you want to delete "${record.name}"?`)) {
+      try {
+        await remove('academicRecords', record.id);
+        dispatch({ type: 'DELETE_ACADEMIC_RECORD', payload: record.id });
+      } catch (error) {
+        console.error('Error deleting record:', error);
+        alert('Failed to delete record');
+      }
+    }
   };
 
   const groupedByTerm = state.academicRecords.reduce((acc, record) => {
@@ -160,348 +135,252 @@ export default function AcademicRecordsPage() {
   const overallGPA = calculateGPA();
 
   return (
-    <>
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Academic Records</Text>
-          <Text style={styles.headerSubtitle}>
-            Overall GPA: {overallGPA}
-          </Text>
-        </View>
+    <div className="academic-records-container p-6 overflow-y-auto custom-scrollbar">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-7xl mx-auto"
+      >
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-extrabold mb-2">
+            <span className="gradient-text">Academic Records</span>
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            Track your completed courses and GPA
+          </p>
+        </div>
 
         {/* GPA Summary */}
-        <Card style={styles.gpaCard}>
-          <Card.Content>
-            <View style={styles.gpaContainer}>
-              <Text style={styles.gpaLabel}>Overall GPA</Text>
-              <Text style={styles.gpaValue}>{overallGPA}</Text>
-              <Text style={styles.gpaSubtext}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-8"
+        >
+          <Card className="bg-gradient-to-br from-purple-600 to-pink-600 border-0">
+            <CardContent className="text-center py-8">
+              <p className="text-sm font-semibold text-white/90 mb-2">Overall GPA</p>
+              <p className="text-6xl font-bold text-white mb-2">{overallGPA}</p>
+              <p className="text-sm text-white/80">
                 Based on {state.academicRecords.length} course{state.academicRecords.length !== 1 ? 's' : ''}
-              </Text>
-            </View>
-          </Card.Content>
-        </Card>
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* GPA Chart */}
+        {state.academicRecords.length > 0 && (
+          <div className="mb-8">
+            <GPAChart records={state.academicRecords} />
+          </div>
+        )}
+
+        {/* Add Record Button */}
+        <div className="mb-6 flex justify-end">
+          <Button onClick={handleAddRecord} variant="primary">
+            + Add Academic Record
+          </Button>
+        </div>
 
         {/* Records by Term */}
-        {Object.entries(groupedByTerm).sort(([a], [b]) => b.localeCompare(a)).map(([term, records]) => (
-          <View key={term}>
-            <Text style={styles.termHeader}>{term}</Text>
-            {records.map(record => (
-              <Card key={record.id} style={styles.card}>
-                <Card.Content>
-                  <View style={styles.recordHeader}>
-                    <View style={styles.recordInfo}>
-                      <Text style={styles.recordName}>{record.name}</Text>
-                      <View style={styles.recordMeta}>
-                        <Text style={styles.recordGrade}>{record.letterGrade || 'N/A'}</Text>
-                        <Text style={styles.recordCredits}>{record.credits} credits</Text>
-                      </View>
-                    </View>
-                    <View style={styles.recordActions}>
-                      <TouchableOpacity
-                        onPress={() => handleEditRecord(record)}
-                        style={styles.actionBtn}
-                      >
-                        <Text style={styles.actionText}>Edit</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => handleDeleteRecord(record)}
-                        style={[styles.actionBtn, styles.deleteBtn]}
-                      >
-                        <Text style={[styles.actionText, styles.deleteText]}>Del</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                  {record.notes && (
-                    <Text style={styles.recordNotes}>{record.notes}</Text>
-                  )}
-                </Card.Content>
-              </Card>
-            ))}
-          </View>
-        ))}
+        {Object.entries(groupedByTerm)
+          .sort(([a], [b]) => b.localeCompare(a))
+          .map(([term, records], termIndex) => (
+            <motion.div
+              key={term}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: termIndex * 0.1 }}
+              className="mb-8"
+            >
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{term}</h2>
+              <div className="space-y-4">
+                {records.map((record, index) => (
+                  <motion.div
+                    key={record.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <Card>
+                      <CardContent>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-semibold mb-2">{record.name}</h3>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                                  {record.letterGrade || 'N/A'}
+                                </span>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  {record.credits} credits
+                                </span>
+                              </div>
+                              {record.gradePercentage && (
+                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  {record.gradePercentage.toFixed(1)}%
+                                </span>
+                              )}
+                            </div>
+                            {record.notes && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400 italic mt-2">
+                                {record.notes}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex gap-2 ml-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditRecord(record)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleDeleteRecord(record)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          ))}
 
         {/* Empty State */}
         {state.academicRecords.length === 0 && (
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text style={styles.emptyText}>No academic records yet</Text>
-              <Text style={styles.emptySubtext}>Add completed courses to track your GPA</Text>
-            </Card.Content>
+          <Card>
+            <CardContent className="text-center py-12">
+              <p className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                No academic records yet
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+                Add completed courses to track your GPA
+              </p>
+              <Button onClick={handleAddRecord} variant="primary">
+                + Add Your First Record
+              </Button>
+            </CardContent>
           </Card>
         )}
-
-        <TouchableOpacity style={styles.addButton} onPress={handleAddRecord}>
-          <Text style={styles.addButtonText}>+ Add Academic Record</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      </motion.div>
 
       {/* Record Modal */}
-      <Modal visible={showModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <Card style={styles.modalCard}>
-            <Card.Content>
-              <ScrollView>
-                <Text style={styles.modalTitle}>
-                  {editingRecord ? 'Edit Record' : 'New Academic Record'}
-                </Text>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        size="lg"
+      >
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+            {editingRecord ? 'Edit Record' : 'New Academic Record'}
+          </h2>
 
-                <TextInput
-                  style={styles.input}
-                  placeholder="Course Name"
-                  value={courseName}
-                  onChangeText={setCourseName}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Course Name *
+              </label>
+              <input
+                type="text"
+                value={courseName}
+                onChange={(e) => setCourseName(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="Enter course name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Term *
+              </label>
+              <input
+                type="text"
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="e.g., Fall 2024"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Credits *
+                </label>
+                <input
+                  type="number"
+                  value={credits}
+                  onChange={(e) => setCredits(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  placeholder="3"
+                  min="0"
+                  step="0.5"
                 />
-
-                <TextInput
-                  style={styles.input}
-                  placeholder="Term (e.g., Fall 2024)"
-                  value={term}
-                  onChangeText={setTerm}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Letter Grade
+                </label>
+                <input
+                  type="text"
+                  value={letterGrade}
+                  onChange={(e) => setLetterGrade(e.target.value.toUpperCase())}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  placeholder="A, B, C..."
+                  maxLength={2}
                 />
+              </div>
+            </div>
 
-                <View style={styles.row}>
-                  <View style={[styles.input, styles.halfInput]}>
-                    <TextInput
-                      placeholder="Credits"
-                      value={credits}
-                      onChangeText={setCredits}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                  <View style={[styles.input, styles.halfInput, { marginLeft: 8 }]}>
-                    <TextInput
-                      placeholder="Letter Grade (A, B, C...)"
-                      value={letterGrade}
-                      onChangeText={setLetterGrade}
-                      autoCapitalize="characters"
-                    />
-                  </View>
-                </View>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Grade Percentage (optional)
+              </label>
+              <input
+                type="number"
+                value={gradePercentage}
+                onChange={(e) => setGradePercentage(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="95.5"
+                min="0"
+                max="100"
+                step="0.1"
+              />
+            </div>
 
-                <TextInput
-                  style={styles.input}
-                  placeholder="Grade Percentage (optional)"
-                  value={gradePercentage}
-                  onChangeText={setGradePercentage}
-                  keyboardType="numeric"
-                />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Notes (optional)
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                rows={3}
+                placeholder="Additional notes..."
+              />
+            </div>
 
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  placeholder="Notes (optional)"
-                  value={notes}
-                  onChangeText={setNotes}
-                  multiline
-                  numberOfLines={3}
-                />
-
-                <View style={styles.modalActions}>
-                  <Button
-                    mode="outlined"
-                    onPress={() => setShowModal(false)}
-                    style={styles.cancelButton}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    mode="contained"
-                    onPress={handleSaveRecord}
-                    style={styles.saveButton}
-                    buttonColor="#7C3AED"
-                  >
-                    Save
-                  </Button>
-                </View>
-              </ScrollView>
-            </Card.Content>
-          </Card>
-        </View>
+            <div className="flex gap-3 justify-end pt-4">
+              <Button variant="outline" onClick={() => setShowModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleSaveRecord}>
+                Save Record
+              </Button>
+            </div>
+          </div>
+        </div>
       </Modal>
-    </>
+    </div>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  header: {
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  gpaCard: {
-    margin: 15,
-    backgroundColor: '#7C3AED',
-  },
-  gpaContainer: {
-    alignItems: 'center',
-  },
-  gpaLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginBottom: 8,
-  },
-  gpaValue: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  gpaSubtext: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  termHeader: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-  },
-  card: {
-    margin: 15,
-    marginBottom: 0,
-  },
-  recordHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  recordInfo: {
-    flex: 1,
-  },
-  recordName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 6,
-  },
-  recordMeta: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-  },
-  recordGrade: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#7C3AED',
-  },
-  recordCredits: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  recordActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  actionBtn: {
-    padding: 6,
-    borderRadius: 6,
-    backgroundColor: '#F3F4F6',
-  },
-  actionText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#7C3AED',
-  },
-  deleteBtn: {
-    backgroundColor: '#FEE2E2',
-  },
-  deleteText: {
-    color: '#EF4444',
-  },
-  recordNotes: {
-    fontSize: 14,
-    color: '#6B7280',
-    fontStyle: 'italic',
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#9CA3AF',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#9CA3AF',
-    textAlign: 'center',
-  },
-  addButton: {
-    backgroundColor: '#7C3AED',
-    margin: 15,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalCard: {
-    width: '90%',
-    maxWidth: 500,
-    maxHeight: '90%',
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  halfInput: {
-    flex: 1,
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: 'top',
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 8,
-  },
-  cancelButton: {
-    flex: 1,
-  },
-  saveButton: {
-    flex: 1,
-  },
-});
+export default AcademicRecordsPage;

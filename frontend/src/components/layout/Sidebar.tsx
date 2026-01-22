@@ -167,15 +167,19 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                     </svg>
                     Academic Records
                   </NavLink>
-                </li>
+                </motion.li>
                 
-                <li>
+                <motion.li
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
                   <NavLink
                     to="/settings"
                     className={({ isActive }) =>
-                      `flex items-center py-2 px-3 rounded-lg ${
+                      `flex items-center py-2 px-3 rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700'
+                          ? 'bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-200 text-amber-800 dark:text-amber-200 theme-pink:text-pink-700 shadow-md'
                           : 'text-gray-700 dark:text-gray-300 theme-pink:text-pink-800 hover:bg-gray-100 dark:hover:bg-gray-700 theme-pink:hover:bg-pink-100'
                       }`
                     }

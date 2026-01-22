@@ -14,11 +14,12 @@ A polished, offline-capable, all-in-one study assistant designed to help student
 - **Study Streak Tracking**: Build consistent study habits with visual progress
 
 ### Technical Features
-- **Offline-First**: All data is stored locally in your browser
+- **Offline-First**: All data is stored locally in your browser (IndexedDB)
 - **No Account Required**: Your data stays on your device, no sign-up needed
-- **Dark/Light Mode**: Study comfortably day or night
-- **Fully Responsive**: Works on desktop and mobile devices
+- **Dark/Light Mode**: Study comfortably day or night with multiple theme options
+- **Fully Responsive**: Works on desktop and web browsers
 - **Data Export/Import**: Backup and transfer your study data
+- **Desktop App**: Available as an Electron desktop application
 
 ##  Getting Started
 
@@ -61,22 +62,15 @@ yarn build
 
 ## 🏗Tech Stack
 
-### Desktop Version
-- **Frontend**: React + TypeScript
-- **UI**: Tailwind CSS + Framer Motion
+### Web & Desktop Version
+- **Frontend**: React 18 + TypeScript
+- **UI**: Tailwind CSS + Framer Motion (animations)
 - **Routing**: React Router
 - **State Management**: Context API + useReducer
-- **Storage**: IndexedDB (via [idb](https://github.com/jakearchibald/idb))
+- **Storage**: IndexedDB (browser) / Electron user data (desktop)
 - **Build Tool**: Vite
 - **Desktop**: Electron
-
-### Mobile Version (iOS/Android)
-- **Framework**: React Native + Expo
-- **UI**: React Native Paper + Custom Components
-- **Navigation**: React Navigation
-- **Storage**: SQLite (via expo-sqlite)
-- **Auth**: Firebase
-- **State**: Context API + useReducer
+- **Deployment**: GitHub Pages (web) + Electron (desktop)
 
 ## Project Structure
 
@@ -132,28 +126,21 @@ To create a new feature:
 
 ---
 
-## 📱 Mobile App (iOS/Android)
+## 🚀 Deployment
 
-StudySidekick is now available as a free, ad-free mobile app! 
+### Web Version (GitHub Pages)
+The app is automatically deployed to GitHub Pages when you push to `master`. See [`README-DEPLOYMENT.md`](./README-DEPLOYMENT.md) for details.
 
-### iOS Setup
-See [`QUICK_START_IOS.md`](./QUICK_START_IOS.md) for quick start guide, or [`IOS_SETUP.md`](./IOS_SETUP.md) for detailed migration documentation.
-
-### Mobile Features
-- ✅ Native iOS and Android support
-- ✅ Offline-first with SQLite
-- ✅ Full sync with cloud backend
-- ✅ Native navigation and UI
-- ✅ Firebase authentication
-- ✅ Push notifications (coming soon)
-
-### Running the Mobile App
+### Desktop App
+Build and run the desktop version locally:
 ```bash
 cd frontend
-npm install
-npm start
-# Press 'i' for iOS or 'a' for Android
+npm install --legacy-peer-deps
+npm run build:web
+npx electron electron.cjs
 ```
+
+See [`QUICK_PUSH_AND_UPDATE.md`](./QUICK_PUSH_AND_UPDATE.md) for step-by-step update instructions.
 
 ## Future Features / Roadmap
 
