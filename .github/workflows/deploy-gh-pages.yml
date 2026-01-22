@@ -37,12 +37,37 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install web dependencies only
         run: |
-          npm install --legacy-peer-deps
-          # Ensure Vite and React dependencies are installed
-          npm install --save-dev vite @vitejs/plugin-react react react-dom @types/react @types/react-dom --legacy-peer-deps || true
-          npm install react react-dom react-router-dom framer-motion tailwindcss postcss autoprefixer --legacy-peer-deps || true
+          # Install web dependencies directly, avoiding React Native packages
+          # Core React
+          npm install react@^18.2.0 react-dom@^18.2.0 --legacy-peer-deps --save || exit 1
+          
+          # Routing and UI
+          npm install react-router-dom@^6.20.0 framer-motion@^10.16.0 classnames@^2.3.2 uuid@^9.0.1 --legacy-peer-deps --save || exit 1
+          
+          # Build tools
+          npm install --save-dev vite@^5.0.0 @vitejs/plugin-react@^4.2.0 typescript@^5.3.0 --legacy-peer-deps || exit 1
+          
+          # Type definitions
+          npm install --save-dev @types/react@^18.2.0 @types/react-dom@^18.2.0 @types/node@^20.0.0 @types/uuid@^9.0.1 --legacy-peer-deps || exit 1
+          
+          # Styling
+          npm install --save-dev tailwindcss@^3.4.0 postcss@^8.4.0 autoprefixer@^10.4.0 @tailwindcss/forms@^0.5.0 --legacy-peer-deps || exit 1
+          
+          # Create stub packages to prevent import errors (they won't be used in web build since isMobile=false)
+          mkdir -p node_modules/@react-navigation/{drawer,native,stack}
+          for dir in drawer native stack; do
+            echo '{"name":"@react-navigation/'$dir'","version":"6.0.0","main":"index.js"}' > node_modules/@react-navigation/$dir/package.json
+            echo 'module.exports = {};' > node_modules/@react-navigation/$dir/index.js
+          done
+          
+          # Stub React Native packages
+          mkdir -p node_modules/{expo,react-native,@react-native-community}
+          echo '{"name":"expo","version":"51.0.0","main":"index.js"}' > node_modules/expo/package.json
+          echo 'module.exports = {};' > node_modules/expo/index.js
+          echo '{"name":"react-native","version":"0.74.0","main":"index.js"}' > node_modules/react-native/package.json
+          echo 'module.exports = {};' > node_modules/react-native/index.js
 
       - name: Build for production
         run: npm run build:web
