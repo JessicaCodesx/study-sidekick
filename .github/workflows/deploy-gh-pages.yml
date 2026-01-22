@@ -58,7 +58,8 @@ jobs:
               "uuid": "^9.0.1",
               "firebase": "^10.7.0",
               "react-quill": "^2.0.0",
-              "recharts": "^2.10.0"
+              "recharts": "^2.10.0",
+              "axios": "^1.6.0"
             },
             "devDependencies": {
               "@types/react": "^18.2.0",
