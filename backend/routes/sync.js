@@ -1,17 +1,17 @@
 // backend/routes/sync.js
-const express = require('express');
-const router = express.Router();
-const auth = require('../middleware/auth');
-const syncController = require('../controllers/syncController');
+import { Router } from 'express';
+const router = Router();
+import auth from '../middleware/auth';
+import { syncData, getChanges } from '../controllers/syncController';
 
 // @route   POST /api/sync
 // @desc    Sync client data to server
 // @access  Private
-router.post('/', auth, syncController.syncData);
+router.post('/', auth, syncData);
 
 // @route   GET /api/sync
 // @desc    Get changes since lastSync
 // @access  Private
-router.get('/', auth, syncController.getChanges);
+router.get('/', auth, getChanges);
 
-module.exports = router;
+export default router;

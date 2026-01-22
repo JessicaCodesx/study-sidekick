@@ -1,4 +1,6 @@
-import { Schema, model } from 'mongoose';
+// models/User.js
+import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
 const userSchema = new Schema({
   firebaseId: {
@@ -39,4 +41,4 @@ const userSchema = new Schema({
   timestamps: true
 });
 
-export default model('User', userSchema);
+export default mongoose.model('User', userSchema);

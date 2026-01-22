@@ -1,22 +1,22 @@
-const AcademicRecord = require('../models/AcademicRecord');
+import AcademicRecord, { find, findById, findByIdAndUpdate, findByIdAndRemove } from '../models/AcademicRecord';
 
 // Get all academic records
-exports.getAcademicRecords = async (req, res) => {
+export async function getAcademicRecords(req, res) {
   try {
-    const records = await AcademicRecord.find({ firebaseId: req.user.id });
+    const records = await find({ firebaseId: req.user.id });
     res.json(records);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Get academic records by term
-exports.getAcademicRecordsByTerm = async (req, res) => {
+export async function getAcademicRecordsByTerm(req, res) {
   try {
     const term = req.params.term;
     
-    const records = await AcademicRecord.find({ 
+    const records = await find({ 
       term,
       firebaseId: req.user.id
     });
@@ -26,10 +26,10 @@ exports.getAcademicRecordsByTerm = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Add a new academic record
-exports.addAcademicRecord = async (req, res) => {
+export async function addAcademicRecord(req, res) {
   try {
     const { name, term, credits, grade, gradePercentage, letterGrade, notes } = req.body;
     
@@ -50,15 +50,15 @@ exports.addAcademicRecord = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Update an academic record
-exports.updateAcademicRecord = async (req, res) => {
+export async function updateAcademicRecord(req, res) {
   try {
     const { name, term, credits, grade, gradePercentage, letterGrade, notes } = req.body;
     
     // Find record and check if it exists
-    let record = await AcademicRecord.findById(req.params.id);
+    let record = await findById(req.params.id);
     
     if (!record) {
       return res.status(404).json({ message: 'Academic record not found' });
@@ -70,7 +70,7 @@ exports.updateAcademicRecord = async (req, res) => {
     }
     
     // Update fields
-    const updatedRecord = await AcademicRecord.findByIdAndUpdate(
+    const updatedRecord = await findByIdAndUpdate(
       req.params.id,
       {
         name,
@@ -89,13 +89,13 @@ exports.updateAcademicRecord = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Delete an academic record
-exports.deleteAcademicRecord = async (req, res) => {
+export async function deleteAcademicRecord(req, res) {
   try {
     // Find record and check if it exists
-    let record = await AcademicRecord.findById(req.params.id);
+    let record = await findById(req.params.id);
     
     if (!record) {
       return res.status(404).json({ message: 'Academic record not found' });
@@ -106,11 +106,11 @@ exports.deleteAcademicRecord = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
     
-    await AcademicRecord.findByIdAndRemove(req.params.id);
+    await findByIdAndRemove(req.params.id);
     
     res.json({ message: 'Academic record removed' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}

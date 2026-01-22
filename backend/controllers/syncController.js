@@ -1,11 +1,11 @@
-// backend/controllers/syncController.js
-const Course = require('../models/Course');
-const Unit = require('../models/Unit');
-const Note = require('../models/Note');
-const Task = require('../models/Task');
-const Flashcard = require('../models/Flashcard');
-const AcademicRecord = require('../models/AcademicRecord');
-const User = require('../models/User');
+// controllers/syncController.js
+import Course from '../models/Course.js';
+import Unit from '../models/Unit.js';
+import Note from '../models/Note.js';
+import Task from '../models/Task.js';
+import Flashcard from '../models/Flashcard.js';
+import AcademicRecord from '../models/AcademicRecord.js';
+import User from '../models/User.js';
 
 // Helper function to convert client IDs to MongoDB _id format if needed
 const processClientId = (clientId) => {
@@ -16,7 +16,7 @@ const processClientId = (clientId) => {
 };
 
 // Handle data sync from client to server
-exports.syncData = async (req, res) => {
+export const syncData = async (req, res) => {
   try {
     const { courses, tasks, flashcards, notes, units, academicRecords, userSettings } = req.body;
     const userId = req.user.id;
@@ -146,6 +146,7 @@ exports.syncData = async (req, res) => {
       timestamp: Date.now(),
       syncResults
     });
+
   } catch (error) {
     console.error('Sync error:', error);
     res.status(500).json({ message: 'Server Error' });
@@ -153,7 +154,7 @@ exports.syncData = async (req, res) => {
 };
 
 // Get changes since lastSync
-exports.getChanges = async (req, res) => {
+export const getChanges = async (req, res) => {
   try {
     const userId = req.user.id;
     const lastSync = req.query.lastSync ? new Date(parseInt(req.query.lastSync)) : new Date(0);

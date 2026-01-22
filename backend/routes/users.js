@@ -1,8 +1,8 @@
 // backend/routes/users.js
-const express = require('express');
-const router = express.Router();
-const { getUserProfile, updateUserProfile } = require('../controllers/userController');
-const auth = require('../middleware/auth');
+import { Router } from 'express';
+const router = Router();
+import { getUserProfile, updateUserProfile } from '../controllers/userController';
+import auth from '../middleware/auth';
 
 // @route   GET /api/users/me
 // @desc    Get user profile
@@ -14,4 +14,4 @@ router.get('/me', auth, getUserProfile);
 // @access  Private
 router.put('/me', auth, updateUserProfile);
 
-module.exports = router;
+export default router;

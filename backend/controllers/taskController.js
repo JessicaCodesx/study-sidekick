@@ -1,24 +1,24 @@
-const Task = require('../models/Task');
-const Course = require('../models/Course');
+import Task, { find, findById, findByIdAndUpdate, findByIdAndRemove } from '../models/Task';
+import { findOne } from '../models/Course';
 
 // Get all tasks for a user
-exports.getTasks = async (req, res) => {
+export async function getTasks(req, res) {
   try {
-    const tasks = await Task.find({ firebaseId: req.user.id });
+    const tasks = await find({ firebaseId: req.user.id });
     res.json(tasks);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Get tasks for a course
-exports.getTasksByCourse = async (req, res) => {
+export async function getTasksByCourse(req, res) {
   try {
     const courseId = req.params.courseId;
     
     // Check if the course exists and belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: courseId,
       firebaseId: req.user.id
     });
@@ -27,22 +27,22 @@ exports.getTasksByCourse = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
     
-    const tasks = await Task.find({ courseId });
+    const tasks = await find({ courseId });
     res.json(tasks);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Add a new task
-exports.addTask = async (req, res) => {
+export async function addTask(req, res) {
   try {
     const { courseId, title, description, dueDate, type, priority, weight } = req.body;
     
     // If courseId is provided, check if the course exists and belongs to the user
     if (courseId) {
-      const course = await Course.findOne({ 
+      const course = await findOne({ 
         _id: courseId,
         firebaseId: req.user.id
       });
@@ -75,15 +75,15 @@ exports.addTask = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Update a task
-exports.updateTask = async (req, res) => {
+export async function updateTask(req, res) {
   try {
     const { title, description, dueDate, type, status, priority, weight, grade } = req.body;
     
     // Find task and check if it exists
-    let task = await Task.findById(req.params.id);
+    let task = await findById(req.params.id);
     
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
@@ -116,7 +116,7 @@ exports.updateTask = async (req, res) => {
       updateData.status = 'overdue';
     }
     
-    const updatedTask = await Task.findByIdAndUpdate(
+    const updatedTask = await findByIdAndUpdate(
       req.params.id,
       updateData,
       { new: true }
@@ -127,13 +127,13 @@ exports.updateTask = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Delete a task
-exports.deleteTask = async (req, res) => {
+export async function deleteTask(req, res) {
   try {
     // Find task and check if it exists
-    let task = await Task.findById(req.params.id);
+    let task = await findById(req.params.id);
     
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
@@ -144,11 +144,11 @@ exports.deleteTask = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
     
-    await Task.findByIdAndRemove(req.params.id);
+    await findByIdAndRemove(req.params.id);
     
     res.json({ message: 'Task removed' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}

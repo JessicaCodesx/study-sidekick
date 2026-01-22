@@ -11,7 +11,7 @@ import Sidebar from './components/layout/Sidebar';
 import PageContainer from './components/layout/PageContainer';
 
 import LandingPage from './pages/LandingPage';
-
+import WelcomeModal from './components/common/WelcomeModal';
 
 import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
@@ -37,6 +37,7 @@ function App() {
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system' | 'pink'>('system');
   const [isDBReady, setIsDBReady] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
     const initializeTheme = async () => {
@@ -78,12 +79,36 @@ function App() {
       try {
         await initDB();
         setIsDBReady(true);
+        
+        // Check if user has any data and if welcome modal was already shown
+        const welcomeShown = localStorage.getItem('welcomeModalShown');
+        if (!welcomeShown) {
+          // Check if there's any existing data
+          const { getAll } = await import('./lib/db');
+          const [courses, tasks, flashcards, notes] = await Promise.all([
+            getAll('courses').catch(() => []),
+            getAll('tasks').catch(() => []),
+            getAll('flashcards').catch(() => []),
+            getAll('notes').catch(() => []),
+          ]);
+          
+          // Show welcome modal only if there's no data
+          const hasData = courses.length > 0 || tasks.length > 0 || flashcards.length > 0 || notes.length > 0;
+          if (!hasData) {
+            setShowWelcomeModal(true);
+          }
+        }
       } catch (error) {
         console.error('Failed to initialize database:', error);
       }
     };
     setupDB();
   }, []);
+
+  const handleCloseWelcomeModal = () => {
+    setShowWelcomeModal(false);
+    localStorage.setItem('welcomeModalShown', 'true');
+  };
 
   const toggleTheme = () => {
     const newDarkMode = !darkMode;
@@ -147,6 +172,11 @@ function App() {
                 <Route path="/*" element={
                   <ProtectedRoute>
                     <>
+                      {/* Welcome Modal for first-time users */}
+                      <WelcomeModal
+                        isOpen={showWelcomeModal}
+                        onClose={handleCloseWelcomeModal}
+                      />
                       <Navigation 
                         isSidebarOpen={isSidebarOpen} 
                         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}

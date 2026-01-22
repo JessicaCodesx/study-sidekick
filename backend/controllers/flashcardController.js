@@ -1,14 +1,14 @@
-const Flashcard = require('../models/Flashcard');
-const Course = require('../models/Course');
-const Unit = require('../models/Unit');
+import Flashcard, { find, findById, findByIdAndUpdate, findByIdAndRemove } from '../models/Flashcard';
+import { findOne } from '../models/Course';
+import { findById as _findById, findOne as _findOne } from '../models/Unit';
 
 // Get all flashcards for a course
-exports.getFlashcardsByCourse = async (req, res) => {
+export async function getFlashcardsByCourse(req, res) {
   try {
     const courseId = req.params.courseId;
     
     // Check if the course exists and belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: courseId,
       firebaseId: req.user.id
     });
@@ -17,28 +17,28 @@ exports.getFlashcardsByCourse = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
     
-    const flashcards = await Flashcard.find({ courseId });
+    const flashcards = await find({ courseId });
     res.json(flashcards);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Get all flashcards for a unit
-exports.getFlashcardsByUnit = async (req, res) => {
+export async function getFlashcardsByUnit(req, res) {
   try {
     const unitId = req.params.unitId;
     
     // Check if the unit exists
-    const unit = await Unit.findById(unitId);
+    const unit = await _findById(unitId);
     
     if (!unit) {
       return res.status(404).json({ message: 'Unit not found' });
     }
     
     // Check if the course belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: unit.courseId,
       firebaseId: req.user.id
     });
@@ -47,21 +47,21 @@ exports.getFlashcardsByUnit = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
     
-    const flashcards = await Flashcard.find({ unitId });
+    const flashcards = await find({ unitId });
     res.json(flashcards);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Add a new flashcard
-exports.addFlashcard = async (req, res) => {
+export async function addFlashcard(req, res) {
   try {
     const { courseId, unitId, question, answer, tags } = req.body;
     
     // Check if the course exists and belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: courseId,
       firebaseId: req.user.id
     });
@@ -71,7 +71,7 @@ exports.addFlashcard = async (req, res) => {
     }
     
     // Check if the unit exists and belongs to the course
-    const unit = await Unit.findOne({
+    const unit = await _findOne({
       _id: unitId,
       courseId
     });
@@ -95,15 +95,15 @@ exports.addFlashcard = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Update a flashcard
-exports.updateFlashcard = async (req, res) => {
+export async function updateFlashcard(req, res) {
   try {
     const { question, answer, tags, reviewCount, confidenceLevel } = req.body;
     
     // Find flashcard and check if it exists
-    let flashcard = await Flashcard.findById(req.params.id);
+    let flashcard = await findById(req.params.id);
     
     if (!flashcard) {
       return res.status(404).json({ message: 'Flashcard not found' });
@@ -115,7 +115,7 @@ exports.updateFlashcard = async (req, res) => {
     }
     
     // Update fields
-    const updatedFlashcard = await Flashcard.findByIdAndUpdate(
+    const updatedFlashcard = await findByIdAndUpdate(
       req.params.id,
       {
         question,
@@ -133,13 +133,13 @@ exports.updateFlashcard = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Delete a flashcard
-exports.deleteFlashcard = async (req, res) => {
+export async function deleteFlashcard(req, res) {
   try {
     // Find flashcard and check if it exists
-    let flashcard = await Flashcard.findById(req.params.id);
+    let flashcard = await findById(req.params.id);
     
     if (!flashcard) {
       return res.status(404).json({ message: 'Flashcard not found' });
@@ -150,11 +150,11 @@ exports.deleteFlashcard = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
     
-    await Flashcard.findByIdAndRemove(req.params.id);
+    await findByIdAndRemove(req.params.id);
     
     res.json({ message: 'Flashcard removed' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}

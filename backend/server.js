@@ -1,9 +1,21 @@
-// backend/server.js
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const path = require('path');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import connectDB from './config/db.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Routes
+import usersRoutes from './routes/users.js';
+import coursesRoutes from './routes/courses.js';
+import unitsRoutes from './routes/units.js';
+import notesRoutes from './routes/notes.js';
+import flashcardsRoutes from './routes/flashcards.js';
+import tasksRoutes from './routes/tasks.js';
+import academicRecordsRoutes from './routes/academicRecords.js';
+import syncRoutes from './routes/sync.js'; // Added sync route
+
+dotenv.config();
 
 // Initialize Express
 const app = express();
@@ -16,14 +28,14 @@ app.use(cors());
 app.use(express.json({ extended: false }));
 
 // Define Routes
-app.use('/api/users', require('./routes/users'));
-app.use('/api/courses', require('./routes/courses'));
-app.use('/api/units', require('./routes/units'));
-app.use('/api/notes', require('./routes/notes'));
-app.use('/api/flashcards', require('./routes/flashcards'));
-app.use('/api/tasks', require('./routes/tasks'));
-app.use('/api/academic-records', require('./routes/academicRecords'));
-app.use('/api/sync', require('./routes/sync')); // Added sync route
+app.use('/api/users', usersRoutes);
+app.use('/api/courses', coursesRoutes);
+app.use('/api/units', unitsRoutes);
+app.use('/api/notes', notesRoutes);
+app.use('/api/flashcards', flashcardsRoutes);
+app.use('/api/tasks', tasksRoutes);
+app.use('/api/academic-records', academicRecordsRoutes);
+app.use('/api/sync', syncRoutes); // Added sync route
 
 // API Health Check
 app.get('/api/health', (req, res) => {
@@ -32,6 +44,10 @@ app.get('/api/health', (req, res) => {
 
 // Serve static assets in production
 if (process.env.NODE_ENV === 'production') {
+  // Get the directory name of the current module
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  
   app.use(express.static('client/build'));
   
   app.get('*', (req, res) => {
@@ -43,4 +59,4 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-module.exports = app; // For testing purposes
+export default app; // For testing purposes

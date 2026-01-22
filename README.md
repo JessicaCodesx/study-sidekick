@@ -61,12 +61,22 @@ yarn build
 
 ## 🏗Tech Stack
 
+### Desktop Version
 - **Frontend**: React + TypeScript
 - **UI**: Tailwind CSS + Framer Motion
 - **Routing**: React Router
 - **State Management**: Context API + useReducer
 - **Storage**: IndexedDB (via [idb](https://github.com/jakearchibald/idb))
 - **Build Tool**: Vite
+- **Desktop**: Electron
+
+### Mobile Version (iOS/Android)
+- **Framework**: React Native + Expo
+- **UI**: React Native Paper + Custom Components
+- **Navigation**: React Navigation
+- **Storage**: SQLite (via expo-sqlite)
+- **Auth**: Firebase
+- **State**: Context API + useReducer
 
 ## Project Structure
 
@@ -122,12 +132,34 @@ To create a new feature:
 
 ---
 
+## 📱 Mobile App (iOS/Android)
+
+StudySidekick is now available as a free, ad-free mobile app! 
+
+### iOS Setup
+See [`QUICK_START_IOS.md`](./QUICK_START_IOS.md) for quick start guide, or [`IOS_SETUP.md`](./IOS_SETUP.md) for detailed migration documentation.
+
+### Mobile Features
+- ✅ Native iOS and Android support
+- ✅ Offline-first with SQLite
+- ✅ Full sync with cloud backend
+- ✅ Native navigation and UI
+- ✅ Firebase authentication
+- ✅ Push notifications (coming soon)
+
+### Running the Mobile App
+```bash
+cd frontend
+npm install
+npm start
+# Press 'i' for iOS or 'a' for Android
+```
+
 ## Future Features / Roadmap
 
 - PDF & image upload for lecture slides
 - OCR + NLP flashcard generation from notes
 - Enhanced spaced repetition algorithm
 - Grade calculator & projected GPA for current courses
-- Cloud sync (optional)
-- Mobile app version
+- Push notifications for due dates
 - AI-powered summarization

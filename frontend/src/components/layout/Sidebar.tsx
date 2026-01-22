@@ -27,7 +27,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: -300, opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="w-64 h-full bg-white dark:bg-gray-800 theme-pink:bg-pink-50 border-r border-gray-200 dark:border-gray-700 theme-pink:border-pink-200 overflow-y-auto flex-shrink-0"
+          className="w-64 h-full glass dark:glass-dark theme-pink:bg-pink-50/80 border-r border-white/20 dark:border-gray-700/50 theme-pink:border-pink-200/50 overflow-y-auto flex-shrink-0 backdrop-blur-xl"
         >
           <nav className="p-4 h-full flex flex-col">
             <div>

@@ -1,226 +1,200 @@
-import { useState, useEffect } from 'react';
+// CoursesPage.tsx - Web version with Tailwind CSS
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useAppContext } from '../context/AppContext';
-import { getAll, add, update, remove } from '../lib/db';
 import { Course } from '../lib/types';
-import { generateId, getCurrentTimestamp } from '../lib/utils';
-import Button from '../components/common/Button';
-import Card, { CardTitle, CardContent } from '../components/common/Card';
+import { add, update, remove } from '../lib/db';
+import { getCurrentTimestamp, generateId } from '../lib/utils';
+import Card from '../components/common/Card';
 import CourseCard from '../components/courses/CourseCard';
 import CourseForm from '../components/courses/CourseForm';
 import Modal from '../components/common/Modal';
-import PageContainer from '../components/layout/PageContainer';
+import Button from '../components/common/Button';
 
 const CoursesPage = () => {
   const { state, dispatch } = useAppContext();
-  const [isAddCourseModalOpen, setIsAddCourseModalOpen] = useState(false);
-  const [isEditCourseModalOpen, setIsEditCourseModalOpen] = useState(false);
-  const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showArchived, setShowArchived] = useState(false);
+  const [filterColor, setFilterColor] = useState<string | null>(null);
 
-  // Load courses if not already loaded
-  useEffect(() => {
-    const loadCourses = async () => {
-      try {
-        if (state.courses.length === 0) {
-          dispatch({ type: 'SET_LOADING', payload: true });
-          const courses = await getAll('courses');
-          dispatch({ type: 'SET_COURSES', payload: courses });
-          dispatch({ type: 'SET_LOADING', payload: false });
-        }
-        
-        // Also load tasks if not already loaded
-        if (state.tasks.length === 0) {
-          dispatch({ type: 'SET_LOADING', payload: true });
-          const tasks = await getAll('tasks');
-          dispatch({ type: 'SET_TASKS', payload: tasks });
-          dispatch({ type: 'SET_LOADING', payload: false });
-        }
-      } catch (error) {
-        console.error('Error loading courses:', error);
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to load courses' });
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }
-    };
+  const activeCourses = state.courses.filter(c => !c.isArchived);
+  const archivedCourses = state.courses.filter(c => c.isArchived);
+
+  // Filter courses based on search and color
+  const filteredActiveCourses = useMemo(() => {
+    let filtered = activeCourses;
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(course =>
+        course.name.toLowerCase().includes(query) ||
+        course.description?.toLowerCase().includes(query) ||
+        course.instructor?.toLowerCase().includes(query)
+      );
+    }
+
+    // Filter by color
+    if (filterColor) {
+      filtered = filtered.filter(course => course.colorTheme === filterColor);
+    }
+
+    return filtered;
+  }, [activeCourses, searchQuery, filterColor]);
+
+  const filteredArchivedCourses = useMemo(() => {
+    if (!showArchived) return [];
     
-    loadCourses();
-  }, []);
+    let filtered = archivedCourses;
 
-  // Filter courses based on archived status
-  const filteredCourses = state.courses.filter(course => course.isArchived === showArchived);
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(course =>
+        course.name.toLowerCase().includes(query) ||
+        course.description?.toLowerCase().includes(query) ||
+        course.instructor?.toLowerCase().includes(query)
+      );
+    }
 
-  // Open add course modal
+    // Filter by color
+    if (filterColor) {
+      filtered = filtered.filter(course => course.colorTheme === filterColor);
+    }
+
+    return filtered;
+  }, [archivedCourses, showArchived, searchQuery, filterColor]);
+
   const handleAddCourse = () => {
-    setCurrentCourse(null);
-    setIsAddCourseModalOpen(true);
+    setEditingCourse(null);
+    setShowModal(true);
   };
 
-  // Open edit course modal
   const handleEditCourse = (course: Course) => {
-    setCurrentCourse(course);
-    setIsEditCourseModalOpen(true);
+    setEditingCourse(course);
+    setShowModal(true);
   };
 
-  // Save new course
-  const handleSaveCourse = async (courseData: Omit<Course, 'id' | 'createdAt' | 'updatedAt' | 'isArchived'>) => {
+  const handleSaveCourse = async (formData: {
+    name: string;
+    colorTheme: string;
+    description: string;
+    instructor: string;
+    schedule: string;
+    location: string;
+  }) => {
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      
       const now = getCurrentTimestamp();
-      const newCourse: Course = {
-        id: generateId(),
-        ...courseData,
-        isArchived: false,
-        createdAt: now,
-        updatedAt: now,
-      };
-      
-      await add('courses', newCourse);
-      dispatch({ type: 'ADD_COURSE', payload: newCourse });
-      setIsAddCourseModalOpen(false);
-      dispatch({ type: 'SET_LOADING', payload: false });
+
+      if (editingCourse) {
+        // Update existing course
+        const updatedCourse: Course = {
+          ...editingCourse,
+          name: formData.name,
+          description: formData.description,
+          colorTheme: formData.colorTheme,
+          instructor: formData.instructor,
+          schedule: formData.schedule,
+          location: formData.location,
+          updatedAt: now,
+        };
+        await update('courses', updatedCourse);
+        dispatch({ type: 'UPDATE_COURSE', payload: updatedCourse });
+      } else {
+        // Create new course
+        const newCourse: Course = {
+          id: generateId(),
+          name: formData.name,
+          description: formData.description,
+          colorTheme: formData.colorTheme,
+          instructor: formData.instructor,
+          schedule: formData.schedule,
+          location: formData.location,
+          isArchived: false,
+          createdAt: now,
+          updatedAt: now,
+        };
+        await add('courses', newCourse);
+        dispatch({ type: 'ADD_COURSE', payload: newCourse });
+      }
+
+      setShowModal(false);
+      setEditingCourse(null);
     } catch (error) {
-      console.error('Error adding course:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to add course' });
-      dispatch({ type: 'SET_LOADING', payload: false });
+      console.error('Error saving course:', error);
+      alert('Failed to save course. Please try again.');
     }
   };
 
-  // Update existing course
-  const handleUpdateCourse = async (courseData: Omit<Course, 'id' | 'createdAt' | 'updatedAt' | 'isArchived'>) => {
-    if (!currentCourse) return;
-    
+  const handleArchiveCourse = async (course: Course) => {
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      
-      const updatedCourse: Course = {
-        ...currentCourse,
-        ...courseData,
-        updatedAt: getCurrentTimestamp(),
-      };
-      
-      await update('courses', updatedCourse);
-      dispatch({ type: 'UPDATE_COURSE', payload: updatedCourse });
-      setIsEditCourseModalOpen(false);
-      setCurrentCourse(null);
-      dispatch({ type: 'SET_LOADING', payload: false });
-    } catch (error) {
-      console.error('Error updating course:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to update course' });
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  };
-
-  // Archive/Unarchive course
-  const handleToggleArchive = async (course: Course) => {
-    try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      
       const updatedCourse: Course = {
         ...course,
         isArchived: !course.isArchived,
         updatedAt: getCurrentTimestamp(),
       };
-      
       await update('courses', updatedCourse);
       dispatch({ type: 'UPDATE_COURSE', payload: updatedCourse });
-      dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
-      console.error('Error archiving/unarchiving course:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to archive/unarchive course' });
-      dispatch({ type: 'SET_LOADING', payload: false });
+      console.error('Error archiving course:', error);
+      alert('Failed to archive course. Please try again.');
     }
   };
 
-  // Delete course
-  const handleDeleteCourse = async (courseId: string) => {
-    if (!window.confirm('Are you sure you want to delete this course? This will also delete all associated notes, flashcards, and tasks.')) {
+  const handleDeleteCourse = async (course: Course) => {
+    if (!confirm(`Are you sure you want to delete "${course.name}"? This action cannot be undone.`)) {
       return;
     }
-    
+
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      
-      await remove('courses', courseId);
-      dispatch({ type: 'DELETE_COURSE', payload: courseId });
-      
-      // TODO: Delete associated notes, flashcards, tasks
-      
-      dispatch({ type: 'SET_LOADING', payload: false });
+      await remove('courses', course.id);
+      dispatch({ type: 'DELETE_COURSE', payload: course.id });
     } catch (error) {
       console.error('Error deleting course:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to delete course' });
-      dispatch({ type: 'SET_LOADING', payload: false });
+      alert('Failed to delete course. Please try again.');
     }
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
-  };
+  // Get unique color themes for filter
+  const availableColors = useMemo(() => {
+    const colors = new Set(activeCourses.map(c => c.colorTheme));
+    return Array.from(colors).sort();
+  }, [activeCourses]);
 
   return (
-    <PageContainer>
-      {/* Header with gradient background */}
-      <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-700 theme-pink:from-pink-50 theme-pink:to-pink-100 shadow-sm">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-600">
-              {showArchived ? 'Archived Courses' : 'My Courses'}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 theme-pink:text-pink-500 mt-1">
-              {showArchived 
-                ? 'View and manage your archived courses' 
-                : 'Manage your courses and their content'}
-            </p>
-          </motion.div>
-          
-          <motion.div 
-            className="mt-3 md:mt-0 flex space-x-3"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <Button
-              variant="outline"
-              onClick={() => setShowArchived(!showArchived)}
-              className="border-amber-300 dark:border-amber-700 theme-pink:border-pink-300 text-amber-700 dark:text-amber-300 theme-pink:text-pink-600"
+    <div className="courses-container p-6 overflow-y-auto custom-scrollbar">
+      <div className="max-w-7xl mx-auto">
+        {/* Header with premium design */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+              <h1 className="text-5xl font-extrabold mb-3">
+                <span className="gradient-text">My Courses</span>
+              </h1>
+              <p className="text-xl text-gray-600 dark:text-gray-300 theme-pink:text-pink-600">
+                {activeCourses.length} active {activeCourses.length === 1 ? 'course' : 'courses'}
+                {archivedCourses.length > 0 && (
+                  <span className="ml-2 text-gray-500 dark:text-gray-400">
+                    • {archivedCourses.length} archived
+                  </span>
+                )}
+              </p>
+            </div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {showArchived ? (
-                <>
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Show Active Courses
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                  </svg>
-                  Show Archived Courses
-                </>
-              )}
-            </Button>
-            
-            <Button
-              variant="primary"
-              leftIcon={
+              <Button
+                variant="primary"
+                onClick={handleAddCourse}
+                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -235,160 +209,247 @@ const CoursesPage = () => {
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
-              }
-              onClick={handleAddCourse}
-            >
-              Add Course
-            </Button>
-          </motion.div>
-        </div>
-      </div>
-      
-      {/* Loading State */}
-      {state.loading && (
-        <motion.div 
-          className="text-center py-12"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400 theme-pink:text-pink-500">Loading courses...</p>
+                Add Course
+              </Button>
+            </motion.div>
+          </div>
         </motion.div>
-      )}
-      
-      {/* Empty State */}
-      {!state.loading && filteredCourses.length === 0 && (
+
+        {/* Search and Filters with premium design */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
         >
-          <Card className="text-center py-12 shadow-md border border-gray-100 dark:border-gray-700 theme-pink:border-pink-200">
-            <CardContent>
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-24 bg-amber-100 dark:bg-amber-900 theme-pink:bg-pink-100 rounded-full flex items-center justify-center mb-6">
+          <Card className="p-6 border-0 bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-900/80 dark:to-gray-800/80">
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1">
+                <div className="relative">
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-12 w-12 text-amber-500 dark:text-amber-400 theme-pink:text-pink-500"
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
                     fill="none"
-                    viewBox="0 0 24 24"
                     stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
                   </svg>
+                  <input
+                    type="text"
+                    placeholder="Search courses..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-purple-500 dark:focus:border-purple-400 transition-all shadow-sm focus:shadow-md"
+                  />
                 </div>
-                
-                {showArchived ? (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 theme-pink:text-pink-600 mb-2">
-                      No Archived Courses
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 theme-pink:text-pink-500 max-w-md mx-auto mb-6">
-                      You don't have any archived courses yet. When you archive a course, it will appear here.
-                    </p>
-                    <Button variant="outline" onClick={() => setShowArchived(false)}>
-                      View Active Courses
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 theme-pink:text-pink-600 mb-2">
-                      No Courses Added Yet
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 theme-pink:text-pink-500 max-w-md mx-auto mb-6">
-                      Get started by adding your first course. You can organize your courses by color, add notes, flashcards, and track your grades.
-                    </p>
-                    <Button 
-                      variant="primary" 
-                      onClick={handleAddCourse}
-                      leftIcon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                      }
-                    >
-                      Add Your First Course
-                    </Button>
-                  </motion.div>
-                )}
               </div>
-            </CardContent>
+
+              {/* Color Filter */}
+              {availableColors.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Filter by color:</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setFilterColor(null)}
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        filterColor === null
+                          ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200'
+                          : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      All
+                    </button>
+                    {availableColors.map(color => (
+                      <button
+                        key={color}
+                        onClick={() => setFilterColor(color)}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          filterColor === color
+                            ? 'ring-2 ring-offset-2 ring-purple-500 dark:ring-purple-400'
+                            : ''
+                        } bg-course-${color} ${['yellow', 'lime', 'amber'].includes(color) ? 'text-gray-900' : 'text-white'}`}
+                        title={color}
+                      >
+                        {filterColor === color && (
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={3}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </Card>
         </motion.div>
-      )}
-      
-      {/* Course Grid with Staggered Animation */}
-      {!state.loading && filteredCourses.length > 0 && (
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6"
-        >
-          {filteredCourses.map(course => (
-            <motion.div key={course.id} variants={itemVariants}>
-              <CourseCard
-                course={course}
-                tasks={state.tasks}
-                onEdit={() => handleEditCourse(course)}
-                onArchive={() => handleToggleArchive(course)}
-                onDelete={() => handleDeleteCourse(course.id)}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
-      )}
-      
-      {/* Add Course Modal */}
-      <Modal
-        isOpen={isAddCourseModalOpen}
-        onClose={() => setIsAddCourseModalOpen(false)}
-        title="Add New Course"
-        size="lg"
-      >
-        <CourseForm 
-          onSubmit={handleSaveCourse}
-          onCancel={() => setIsAddCourseModalOpen(false)}
-        />
-      </Modal>
-      
-      {/* Edit Course Modal */}
-      <Modal
-        isOpen={isEditCourseModalOpen}
-        onClose={() => setIsEditCourseModalOpen(false)}
-        title="Edit Course"
-        size="lg"
-      >
-        {currentCourse && (
-          <CourseForm 
-            initialData={{
-              name: currentCourse.name,
-              colorTheme: currentCourse.colorTheme,
-              description: currentCourse.description || '',
-              instructor: currentCourse.instructor || '',
-              schedule: currentCourse.schedule || '',
-              location: currentCourse.location || '',
-            }}
-            onSubmit={handleUpdateCourse}
-            onCancel={() => setIsEditCourseModalOpen(false)}
-          />
+
+        {/* Active Courses with premium grid */}
+        {filteredActiveCourses.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+          >
+            {filteredActiveCourses.map((course, index) => (
+              <motion.div
+                key={course.id}
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ 
+                  delay: index * 0.08,
+                  type: 'spring',
+                  stiffness: 100,
+                  damping: 15
+                }}
+                whileHover={{ y: -8, scale: 1.02 }}
+                className="h-full"
+              >
+                <CourseCard
+                  course={course}
+                  tasks={state.tasks}
+                  onEdit={() => handleEditCourse(course)}
+                  onArchive={() => handleArchiveCourse(course)}
+                  onDelete={() => handleDeleteCourse(course)}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8"
+          >
+            <Card className="text-center py-16 border-0 bg-gradient-to-br from-purple-50/50 via-pink-50/50 to-blue-50/50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-blue-900/20">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: 'spring' }}
+                className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center shadow-lg"
+              >
+                <svg
+                  className="w-12 h-12 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                  />
+                </svg>
+              </motion.div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                {searchQuery || filterColor ? 'No courses found' : 'No courses yet'}
+              </h3>
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+                {searchQuery || filterColor
+                  ? 'Try adjusting your search or filters'
+                  : 'Add your first course to get started'}
+              </p>
+              {!searchQuery && !filterColor && (
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button 
+                    variant="primary" 
+                    onClick={handleAddCourse}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all"
+                  >
+                    Add Your First Course
+                  </Button>
+                </motion.div>
+              )}
+            </Card>
+          </motion.div>
         )}
-      </Modal>
-    </PageContainer>
+
+        {/* Archived Courses */}
+        {archivedCourses.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white theme-pink:text-pink-700">
+                Archived Courses
+              </h2>
+              <button
+                onClick={() => setShowArchived(!showArchived)}
+                className="text-sm text-purple-600 dark:text-purple-400 theme-pink:text-pink-600 hover:underline"
+              >
+                {showArchived ? 'Hide' : 'Show'} ({archivedCourses.length})
+              </button>
+            </div>
+
+            {showArchived && filteredArchivedCourses.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredArchivedCourses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    tasks={state.tasks}
+                    onEdit={() => handleEditCourse(course)}
+                    onArchive={() => handleArchiveCourse(course)}
+                    onDelete={() => handleDeleteCourse(course)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Course Modal */}
+        <Modal
+          isOpen={showModal}
+          onClose={() => {
+            setShowModal(false);
+            setEditingCourse(null);
+          }}
+          title={editingCourse ? 'Edit Course' : 'New Course'}
+          size="lg"
+        >
+          <CourseForm
+            initialData={
+              editingCourse
+                ? {
+                    name: editingCourse.name,
+                    colorTheme: editingCourse.colorTheme,
+                    description: editingCourse.description || '',
+                    instructor: editingCourse.instructor || '',
+                    schedule: editingCourse.schedule || '',
+                    location: editingCourse.location || '',
+                  }
+                : undefined
+            }
+            onSubmit={handleSaveCourse}
+            onCancel={() => {
+              setShowModal(false);
+              setEditingCourse(null);
+            }}
+          />
+        </Modal>
+      </div>
+    </div>
   );
 };
 

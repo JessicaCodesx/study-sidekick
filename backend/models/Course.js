@@ -1,4 +1,6 @@
-import { Schema, model } from 'mongoose';
+// models/Course.js
+import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
 const courseSchema = new Schema({
   // Client-generated ID field to match IndexedDB IDs
@@ -38,4 +40,4 @@ const courseSchema = new Schema({
 // Add compound index for faster queries
 courseSchema.index({ firebaseId: 1, id: 1 });
 
-export default model('Course', courseSchema);
+export default mongoose.model('Course', courseSchema);

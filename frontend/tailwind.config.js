@@ -80,6 +80,27 @@ module.exports = {
         // Soft shadow for pink theme
         'cute': '0 4px 10px -1px rgba(244, 114, 182, 0.2), 0 2px 6px -1px rgba(244, 114, 182, 0.15)',
       },
+      animation: {
+        'blob': 'blob 7s infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'shimmer': 'shimmer 2s infinite',
+      },
+      keyframes: {
+        blob: {
+          '0%': { transform: 'translate(0px, 0px) scale(1)' },
+          '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+          '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+          '100%': { transform: 'translate(0px, 0px) scale(1)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+      },
       spacing: {
         '72': '18rem',
         '80': '20rem',

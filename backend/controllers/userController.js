@@ -1,17 +1,17 @@
 // backend/controllers/userController.js
-const User = require('../models/User');
-const admin = require('../config/firebase');
+import User, { findOne } from '../models/User';
+import { auth } from '../config/firebase';
 
 // Get or create user profile
-exports.getUserProfile = async (req, res) => {
+export async function getUserProfile(req, res) {
   try {
     // Get user from MongoDB by Firebase UID
-    let user = await User.findOne({ firebaseId: req.user.id });
+    let user = await findOne({ firebaseId: req.user.id });
     
     // If user doesn't exist in MongoDB, create one based on Firebase data
     if (!user) {
       // Get user data from Firebase
-      const firebaseUser = await admin.auth().getUser(req.user.id);
+      const firebaseUser = await auth().getUser(req.user.id);
       
       user = new User({
         firebaseId: req.user.id,
@@ -30,15 +30,15 @@ exports.getUserProfile = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Update user profile
-exports.updateUserProfile = async (req, res) => {
+export async function updateUserProfile(req, res) {
   try {
     const { displayName, avatar, theme, studyStreak, lastStudyDate } = req.body;
 
     // Find user by Firebase UID
-    const user = await User.findOne({ firebaseId: req.user.id });
+    const user = await findOne({ firebaseId: req.user.id });
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -58,4 +58,4 @@ exports.updateUserProfile = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}

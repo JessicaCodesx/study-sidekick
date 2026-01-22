@@ -1,9 +1,9 @@
 // backend/middleware/auth.js
-const admin = require('../config/firebase');
+import admin from '../config/firebase.js';
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization').replace('Bearer ', '');
+    const token = req.header('Authorization')?.replace('Bearer ', '');
     
     if (!token) {
       return res.status(401).json({ message: 'No authentication token, access denied' });
@@ -20,4 +20,4 @@ const auth = async (req, res, next) => {
   }
 };
 
-module.exports = auth;
+export default auth;

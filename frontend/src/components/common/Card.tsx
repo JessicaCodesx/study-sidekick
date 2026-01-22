@@ -18,22 +18,22 @@ const Card = ({
   variant = 'default',
   border = true,
 }: CardProps) => {
-  const baseClasses = 'bg-white dark:bg-gray-800 rounded shadow';
+  const baseClasses = 'glass dark:glass-dark rounded-2xl card-glow';
   
   const paddingClasses = {
     none: '',
     sm: 'p-3',
-    md: 'p-4',
+    md: 'p-5',
     lg: 'p-6',
   };
   
   const variantClasses = {
     default: '',
-    hover: 'transition-shadow hover:shadow-card-hover',
-    interactive: 'transition-shadow hover:shadow-card-hover cursor-pointer',
+    hover: 'card-glow-hover cursor-pointer',
+    interactive: 'card-glow-hover cursor-pointer',
   };
   
-  const borderClass = border ? 'border border-gray-100 dark:border-gray-700' : '';
+  const borderClass = border ? 'border border-white/20 dark:border-gray-700/50' : '';
   
   const cardClasses = classNames(
     baseClasses,
@@ -74,7 +74,7 @@ export const CardTitle = ({
   className?: string;
 }) => {
   return (
-    <h3 className={classNames('text-lg font-medium text-gray-900 dark:text-white', className)}>
+    <h3 className={classNames('text-xl font-bold text-gray-900 dark:text-white gradient-text', className)}>
       {children}
     </h3>
   );

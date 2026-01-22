@@ -1,107 +1,157 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+// src/context/AuthContext.tsx
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { 
-  User, 
+  User as FirebaseUser,
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
   signOut, 
   onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  sendPasswordResetEmail,
-  UserCredential, 
-  AuthCredential 
+  sendPasswordResetEmail
 } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { auth } from '../config/firebase';
 import { handleUserSignIn } from '../lib/userProfile';
-import { initDB } from '../lib/db';
+import userService from '../services/userService';
+import { User } from '../lib/types';
 
-
-// Define the shape of our auth context
 interface AuthContextType {
-  currentUser: User | null;
+  currentUser: FirebaseUser | null;
+  userProfile: User | null;
   isLoading: boolean;
-  signUp: (email: string, password: string) => Promise<UserCredential>; 
-  signIn: (email: string, password: string) => Promise<UserCredential>; 
-  signInWithGoogle: () => Promise<UserCredential>; 
+  error: string | null;
+  signUp: (email: string, password: string) => Promise<FirebaseUser>;
+  signIn: (email: string, password: string) => Promise<FirebaseUser>;
+  signInWithGoogle: () => Promise<FirebaseUser>;
   logOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
 
-// Create the context with a default value
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  currentUser: null,
+  userProfile: null,
+  isLoading: true,
+  error: null,
+  signUp: async () => { throw new Error('Not implemented'); },
+  signIn: async () => { throw new Error('Not implemented'); },
+  signInWithGoogle: async () => { throw new Error('Not implemented'); },
+  logOut: async () => { throw new Error('Not implemented'); },
+  resetPassword: async () => { throw new Error('Not implemented'); }
+});
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+export const useAuth = () => useContext(AuthContext);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [error, setError] = useState<string | null>(null);
+
+  // Check if user is authenticated
   useEffect(() => {
-    // Set up listener for auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       
       if (user) {
-        // Initialize database with user ID
-        await initDB(user.uid);
-        
-        // Create or update user profile
-        await handleUserSignIn(user);
+        try {
+          // Get user profile from backend
+          const profile = await userService.getUserProfile();
+          setUserProfile(profile);
+        } catch (error: any) {
+          console.error('Error fetching user profile:', error);
+          
+          // If there's no profile on the backend, create one from Firebase info
+          try {
+            const defaultProfile = await handleUserSignIn(user);
+            setUserProfile(defaultProfile);
+          } catch (profileError) {
+            console.error('Error creating user profile:', profileError);
+          }
+        }
+      } else {
+        setUserProfile(null);
       }
       
       setIsLoading(false);
     });
-    
-    // Clean up the listener on unmount
+
     return unsubscribe;
   }, []);
-  
-  // Sign up with email/password
-  const signUp = async (email: string, password: string) => {
-    return createUserWithEmailAndPassword(auth, email, password);
+
+  // Sign up
+  const signUp = async (email: string, password: string): Promise<FirebaseUser> => {
+    setError(null);
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      return result.user;
+    } catch (error: any) {
+      setError(error.message);
+      throw error;
+    }
   };
-  
-  // Sign in with email/password
-  const signIn = async (email: string, password: string) => {
-    return signInWithEmailAndPassword(auth, email, password);
+
+  // Sign in
+  const signIn = async (email: string, password: string): Promise<FirebaseUser> => {
+    setError(null);
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      return result.user;
+    } catch (error: any) {
+      setError(error.message);
+      throw error;
+    }
   };
-  
+
   // Sign in with Google
-  const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+  const signInWithGoogle = async (): Promise<FirebaseUser> => {
+    setError(null);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      return result.user;
+    } catch (error: any) {
+      setError(error.message);
+      throw error;
+    }
   };
-  
-  // Sign out
-  const logOut = async () => {
-    return signOut(auth);
+
+  // Log out
+  const logOut = async (): Promise<void> => {
+    setError(null);
+    try {
+      await signOut(auth);
+    } catch (error: any) {
+      setError(error.message);
+      throw error;
+    }
   };
-  
+
   // Reset password
-  const resetPassword = async (email: string) => {
-    return sendPasswordResetEmail(auth, email);
+  const resetPassword = async (email: string): Promise<void> => {
+    setError(null);
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error: any) {
+      setError(error.message);
+      throw error;
+    }
   };
-  
+
   const value = {
     currentUser,
+    userProfile,
     isLoading,
+    error,
     signUp,
     signIn,
     signInWithGoogle,
     logOut,
     resetPassword
   };
-  
-  return (
-    <AuthContext.Provider value={value}>
-      {!isLoading && children}
-    </AuthContext.Provider>
-  );
-}
 
-// Create a custom hook to use the auth context
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

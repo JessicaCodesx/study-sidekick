@@ -1,14 +1,14 @@
-const Note = require('../models/Note');
-const Course = require('../models/Course');
-const Unit = require('../models/Unit');
+import Note, { find, findById, findByIdAndUpdate, findByIdAndRemove } from '../models/Note';
+import { findOne } from '../models/Course';
+import { findById as _findById, findOne as _findOne } from '../models/Unit';
 
 // Get all notes for a course
-exports.getNotesByCourse = async (req, res) => {
+export async function getNotesByCourse(req, res) {
   try {
     const courseId = req.params.courseId;
     
     // Check if the course exists and belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: courseId,
       firebaseId: req.user.id
     });
@@ -17,28 +17,28 @@ exports.getNotesByCourse = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
     
-    const notes = await Note.find({ courseId });
+    const notes = await find({ courseId });
     res.json(notes);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Get all notes for a unit
-exports.getNotesByUnit = async (req, res) => {
+export async function getNotesByUnit(req, res) {
   try {
     const unitId = req.params.unitId;
     
     // Check if the unit exists and belongs to the user
-    const unit = await Unit.findById(unitId);
+    const unit = await _findById(unitId);
     
     if (!unit) {
       return res.status(404).json({ message: 'Unit not found' });
     }
     
     // Check if the course belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: unit.courseId,
       firebaseId: req.user.id
     });
@@ -47,21 +47,21 @@ exports.getNotesByUnit = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
     
-    const notes = await Note.find({ unitId });
+    const notes = await find({ unitId });
     res.json(notes);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Add a new note
-exports.addNote = async (req, res) => {
+export async function addNote(req, res) {
   try {
     const { courseId, unitId, title, content, tags } = req.body;
     
     // Check if the course exists and belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: courseId,
       firebaseId: req.user.id
     });
@@ -71,7 +71,7 @@ exports.addNote = async (req, res) => {
     }
     
     // Check if the unit exists and belongs to the course
-    const unit = await Unit.findOne({
+    const unit = await _findOne({
       _id: unitId,
       courseId
     });
@@ -95,15 +95,15 @@ exports.addNote = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Update a note
-exports.updateNote = async (req, res) => {
+export async function updateNote(req, res) {
   try {
     const { title, content, tags } = req.body;
     
     // Find note and check if it exists
-    let note = await Note.findById(req.params.id);
+    let note = await findById(req.params.id);
     
     if (!note) {
       return res.status(404).json({ message: 'Note not found' });
@@ -115,7 +115,7 @@ exports.updateNote = async (req, res) => {
     }
     
     // Update fields
-    const updatedNote = await Note.findByIdAndUpdate(
+    const updatedNote = await findByIdAndUpdate(
       req.params.id,
       {
         title,
@@ -130,13 +130,13 @@ exports.updateNote = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Delete a note
-exports.deleteNote = async (req, res) => {
+export async function deleteNote(req, res) {
   try {
     // Find note and check if it exists
-    let note = await Note.findById(req.params.id);
+    let note = await findById(req.params.id);
     
     if (!note) {
       return res.status(404).json({ message: 'Note not found' });
@@ -147,11 +147,11 @@ exports.deleteNote = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
     
-    await Note.findByIdAndRemove(req.params.id);
+    await findByIdAndRemove(req.params.id);
     
     res.json({ message: 'Note removed' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}

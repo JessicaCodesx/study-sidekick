@@ -1,8 +1,8 @@
-// backend/routes/courses.js
-const express = require('express');
+import express from 'express';
+import auth from '../middleware/auth.js';
+import { getCourses, addCourse, updateCourse, deleteCourse } from '../controllers/courseController.js';
+
 const router = express.Router();
-const auth = require('../middleware/auth');
-const { getCourses, addCourse, updateCourse, deleteCourse } = require('../controllers/courseController');
 
 // @route   GET /api/courses
 // @desc    Get all courses
@@ -24,4 +24,4 @@ router.put('/:id', auth, updateCourse);
 // @access  Private
 router.delete('/:id', auth, deleteCourse);
 
-module.exports = router;
+export default router;

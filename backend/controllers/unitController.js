@@ -1,13 +1,13 @@
-const Unit = require('../models/Unit');
-const Course = require('../models/Course');
+import Unit, { find, findById, findByIdAndUpdate, findByIdAndRemove } from '../models/Unit';
+import { findOne } from '../models/Course';
 
 // Get all units for a course
-exports.getUnitsByCourse = async (req, res) => {
+export async function getUnitsByCourse(req, res) {
   try {
     const courseId = req.params.courseId;
     
     // Check if the course exists and belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: courseId,
       firebaseId: req.user.id
     });
@@ -16,21 +16,21 @@ exports.getUnitsByCourse = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
     
-    const units = await Unit.find({ courseId });
+    const units = await find({ courseId });
     res.json(units);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Add a new unit
-exports.addUnit = async (req, res) => {
+export async function addUnit(req, res) {
   try {
     const { courseId, name, orderIndex, description } = req.body;
     
     // Check if the course exists and belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: courseId,
       firebaseId: req.user.id
     });
@@ -53,22 +53,22 @@ exports.addUnit = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Update a unit
-exports.updateUnit = async (req, res) => {
+export async function updateUnit(req, res) {
   try {
     const { name, orderIndex, description } = req.body;
     
     // Find unit and check if it exists
-    let unit = await Unit.findById(req.params.id);
+    let unit = await findById(req.params.id);
     
     if (!unit) {
       return res.status(404).json({ message: 'Unit not found' });
     }
     
     // Check if the course belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: unit.courseId,
       firebaseId: req.user.id
     });
@@ -78,7 +78,7 @@ exports.updateUnit = async (req, res) => {
     }
     
     // Update fields
-    const updatedUnit = await Unit.findByIdAndUpdate(
+    const updatedUnit = await findByIdAndUpdate(
       req.params.id,
       {
         name,
@@ -93,20 +93,20 @@ exports.updateUnit = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}
 
 // Delete a unit
-exports.deleteUnit = async (req, res) => {
+export async function deleteUnit(req, res) {
   try {
     // Find unit and check if it exists
-    let unit = await Unit.findById(req.params.id);
+    let unit = await findById(req.params.id);
     
     if (!unit) {
       return res.status(404).json({ message: 'Unit not found' });
     }
     
     // Check if the course belongs to the user
-    const course = await Course.findOne({ 
+    const course = await findOne({ 
       _id: unit.courseId,
       firebaseId: req.user.id
     });
@@ -115,11 +115,11 @@ exports.deleteUnit = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
     
-    await Unit.findByIdAndRemove(req.params.id);
+    await findByIdAndRemove(req.params.id);
     
     res.json({ message: 'Unit removed' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
   }
-};
+}

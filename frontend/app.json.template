@@ -1,0 +1,8 @@
+{
+  "expo": {
+    "extra": {
+      "apiUrl": "YOUR_API_URL_HERE"
+    }
+  }
+}
+

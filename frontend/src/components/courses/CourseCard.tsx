@@ -73,19 +73,19 @@ const CourseCard = ({ course, tasks, onEdit, onArchive, onDelete }: CourseCardPr
   return (
     <Card 
       variant="hover" 
-      className="h-full overflow-hidden border border-gray-100 dark:border-gray-700 theme-pink:border-pink-200 shadow-md hover:shadow-lg transition-all duration-300"
+      className="h-full overflow-hidden border-0 bg-gradient-to-br from-white/90 to-gray-50/90 dark:from-gray-800/90 dark:to-gray-900/90 shadow-xl hover:shadow-2xl transition-all duration-300 group"
     >
-      <div className={`h-2 w-full ${getColorClasses(course.colorTheme)}`}></div>
+      <div className={`h-1.5 w-full ${getColorClasses(course.colorTheme)} rounded-t-2xl`}></div>
       <CardContent className="p-6">
         <div className="flex items-start">
           <div 
-            className={`w-14 h-14 rounded-lg flex items-center justify-center text-xl font-bold ${getColorClasses(course.colorTheme)} shadow-sm`}
+            className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-extrabold ${getColorClasses(course.colorTheme)} shadow-lg group-hover:scale-110 transition-transform duration-300`}
           >
             {course.name.charAt(0).toUpperCase()}
           </div>
           
           <div className="ml-4 flex-1">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white theme-pink:text-pink-700">
+            <h3 className="text-xl font-extrabold text-gray-900 dark:text-white theme-pink:text-pink-700 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
               {course.name}
             </h3>
             
@@ -120,9 +120,9 @@ const CourseCard = ({ course, tasks, onEdit, onArchive, onDelete }: CourseCardPr
         </div>
         
         {/* Current Grade and Tasks Status */}
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="mt-6 grid grid-cols-2 gap-4">
           {/* Current Grade */}
-          <div className="bg-gray-50 dark:bg-gray-800 theme-pink:bg-pink-50 p-3 rounded-lg">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 theme-pink:from-pink-50 theme-pink:to-pink-100 p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
             <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 theme-pink:text-pink-400 uppercase tracking-wide mb-1">Current Grade</h4>
             {percentage !== undefined ? (
               <div className="flex items-center">
@@ -137,7 +137,7 @@ const CourseCard = ({ course, tasks, onEdit, onArchive, onDelete }: CourseCardPr
           </div>
           
           {/* Tasks Status */}
-          <div className="bg-gray-50 dark:bg-gray-800 theme-pink:bg-pink-50 p-3 rounded-lg">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 theme-pink:from-pink-50 theme-pink:to-pink-100 p-4 rounded-xl border border-gray-200/50 dark:border-gray-700/50">
             <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 theme-pink:text-pink-400 uppercase tracking-wide mb-1">Tasks</h4>
             {totalTasks > 0 ? (
               <div className="flex items-center justify-between">

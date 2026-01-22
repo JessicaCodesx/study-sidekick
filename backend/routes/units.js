@@ -1,12 +1,7 @@
-const express = require('express');
-const router = express.Router();
-const auth = require('../middleware/auth');
-const { 
-  getUnitsByCourse, 
-  addUnit, 
-  updateUnit, 
-  deleteUnit 
-} = require('../controllers/unitController');
+import { Router } from 'express';
+const router = Router();
+import auth from '../middleware/auth';
+import { getUnitsByCourse, addUnit, updateUnit, deleteUnit } from '../controllers/unitController';
 
 // @route   GET /api/units/course/:courseId
 // @desc    Get all units for a course
@@ -28,4 +23,4 @@ router.put('/:id', auth, updateUnit);
 // @access  Private
 router.delete('/:id', auth, deleteUnit);
 
-module.exports = router;
+export default router;

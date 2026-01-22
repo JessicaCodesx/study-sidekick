@@ -42,7 +42,7 @@ const Navigation = ({ isSidebarOpen, toggleSidebar }: NavigationProps) => {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 theme-pink:border-pink-200 sticky top-0 z-10 w-full">
+    <header className="glass dark:glass-dark border-b border-white/20 dark:border-gray-700/50 sticky top-0 z-10 w-full backdrop-blur-xl">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center">
           <button
