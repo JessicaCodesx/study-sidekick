@@ -40,6 +40,14 @@ jobs:
 
       - name: Install web dependencies only
         run: |
+          # Verify vite.config.ts exists before modifying package.json
+          if [ ! -f vite.config.ts ]; then
+            echo "Error: vite.config.ts not found in frontend directory!"
+            ls -la
+            exit 1
+          fi
+          echo "✓ vite.config.ts found"
+          
           # Backup original package.json
           cp package.json package.json.backup
           
@@ -90,7 +98,27 @@ jobs:
           npm list react react-dom vite || echo "Warning: Some packages may be missing"
 
       - name: Build for production
-        run: npm run build:web
+        run: |
+          # Ensure vite.config.ts exists
+          if [ ! -f vite.config.ts ]; then
+            echo "Error: vite.config.ts not found!"
+            exit 1
+          fi
+          # Verify the config will use correct base path
+          echo "Building with NODE_ENV=production, BUILD_TARGET=web"
+          echo "Expected base path: /study-sidekick/"
+          # Export environment variables explicitly
+          export NODE_ENV=production
+          export BUILD_TARGET=web
+          # Build with explicit production environment
+          npm run build:web
+          # Verify the built index.html has correct paths
+          if [ -f dist/index.html ]; then
+            echo "=== Checking built index.html for base path ==="
+            echo "First few lines with asset references:"
+            grep -E "(href|src)" dist/index.html | head -5 || echo "No href/src found"
+            echo "=== End of index.html check ==="
+          fi
         env:
           NODE_ENV: production
           BUILD_TARGET: web
