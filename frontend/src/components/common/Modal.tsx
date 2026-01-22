@@ -24,6 +24,27 @@ const Modal = ({
 }: ModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore scroll position
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen]);
+  
   // Handle escape key press
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -56,10 +77,10 @@ const Modal = ({
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] overflow-y-auto">
+        <div className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain">
           <motion.div
             ref={overlayRef}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 min-h-screen overscroll-contain"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -69,6 +90,7 @@ const Modal = ({
             <motion.div
               className={classNames(
                 'glass dark:glass-dark rounded-3xl shadow-2xl w-full mx-auto border border-white/20 dark:border-gray-700/30',
+                'max-h-[90vh] max-w-[95vw] flex flex-col overflow-hidden my-auto',
                 sizeClasses[size]
               )}
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -83,7 +105,7 @@ const Modal = ({
               onClick={(e) => e.stopPropagation()}
             >
               {(title || showCloseButton) && (
-                <div className="flex justify-between items-center border-b border-gray-200/50 dark:border-gray-700/50 p-6 bg-gradient-to-r from-transparent via-gray-50/50 to-transparent dark:via-gray-800/50">
+                <div className="flex justify-between items-center border-b border-gray-200/50 dark:border-gray-700/50 p-6 bg-gradient-to-r from-transparent via-gray-50/50 to-transparent dark:via-gray-800/50 flex-shrink-0">
                   {title && (
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white gradient-text">
                       {title}
@@ -113,7 +135,7 @@ const Modal = ({
                   )}
                 </div>
               )}
-              <div className="p-6">{children}</div>
+              <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">{children}</div>
             </motion.div>
           </motion.div>
         </div>

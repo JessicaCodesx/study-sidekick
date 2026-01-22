@@ -23,7 +23,7 @@ const WelcomeModal = ({ isOpen, onClose }: WelcomeModalProps) => {
         {/* Decorative gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-blue-500/10 rounded-2xl"></div>
         
-        <div className="relative p-8">
+        <div className="relative p-6 md:p-8">
           {/* Header with animated icon */}
           <motion.div
             initial={{ scale: 0 }}
@@ -50,7 +50,7 @@ const WelcomeModal = ({ isOpen, onClose }: WelcomeModalProps) => {
               Your all-in-one study assistant for academic success
             </p>
             
-            <div className="space-y-5 text-left text-gray-700 dark:text-gray-300">
+            <div className="space-y-4 md:space-y-5 text-left text-gray-700 dark:text-gray-300">
               {/* What is StudySidekick */}
               <div>
                 <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
@@ -137,9 +137,9 @@ const WelcomeModal = ({ isOpen, onClose }: WelcomeModalProps) => {
           {/* Tech Stack Section */}
           {showTechStack ? (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               className="mb-6"
             >
               <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-6 border border-blue-200/50 dark:border-blue-700/50">
