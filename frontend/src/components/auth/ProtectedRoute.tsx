@@ -1,7 +1,8 @@
 // src/components/auth/ProtectedRoute.tsx
-import { ReactNode, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { auth } from '../../config/firebase';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -9,7 +10,11 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { currentUser, isLoading } = useAuth();
-  const navigate = useNavigate();
+  
+  // If Firebase is not configured, allow access (offline mode)
+  if (!auth) {
+    return <>{children}</>;
+  }
   
   // While checking authentication status, show loading indicator
   if (isLoading) {

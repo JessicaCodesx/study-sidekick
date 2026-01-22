@@ -18,12 +18,18 @@ const api = axios.create({
 
 // Add auth token to every request
 api.interceptors.request.use(async (config) => {
-  const auth = getAuth();
-  const user = auth.currentUser;
-  
-  if (user) {
-    const token = await user.getIdToken();
-    config.headers.Authorization = `Bearer ${token}`;
+  try {
+    const auth = getAuth();
+    if (auth) {
+      const user = auth.currentUser;
+      if (user) {
+        const token = await user.getIdToken();
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+  } catch (error) {
+    // Firebase not available, continue without auth token
+    console.warn('Firebase auth not available for API requests');
   }
   
   return config;

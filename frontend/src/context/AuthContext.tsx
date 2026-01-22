@@ -53,6 +53,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Check if user is authenticated
   useEffect(() => {
+    // If Firebase auth is not available, skip authentication
+    if (!auth) {
+      setIsLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       
@@ -84,6 +90,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Sign up
   const signUp = async (email: string, password: string): Promise<FirebaseUser> => {
+    if (!auth) {
+      const errorMsg = 'Firebase authentication is not available. Please configure Firebase environment variables.';
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
     setError(null);
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
@@ -96,6 +107,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Sign in
   const signIn = async (email: string, password: string): Promise<FirebaseUser> => {
+    if (!auth) {
+      const errorMsg = 'Firebase authentication is not available. Please configure Firebase environment variables.';
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
     setError(null);
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
@@ -108,6 +124,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Sign in with Google
   const signInWithGoogle = async (): Promise<FirebaseUser> => {
+    if (!auth) {
+      const errorMsg = 'Firebase authentication is not available. Please configure Firebase environment variables.';
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
     setError(null);
     try {
       const provider = new GoogleAuthProvider();
@@ -121,6 +142,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Log out
   const logOut = async (): Promise<void> => {
+    if (!auth) {
+      return; // No-op if auth is not available
+    }
     setError(null);
     try {
       await signOut(auth);
@@ -132,6 +156,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Reset password
   const resetPassword = async (email: string): Promise<void> => {
+    if (!auth) {
+      const errorMsg = 'Firebase authentication is not available. Please configure Firebase environment variables.';
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    }
     setError(null);
     try {
       await sendPasswordResetEmail(auth, email);
