@@ -89,3 +89,54 @@ export async function getUserSettings(): Promise<any> {
   const users = await getAll('user');
   return users.length > 0 ? users[0] : null;
 }
+
+export async function saveUserSettings(userSettings: any): Promise<void> {
+  if (!dbInstance) await initDB();
+  
+  // Ensure userSettings has an id
+  if (!userSettings.id) {
+    userSettings.id = 'user';
+  }
+  
+  // Use update (put) which will create if doesn't exist or update if it does
+  await update('user', userSettings);
+}
+
+export async function exportDatabase(): Promise<any> {
+  if (!dbInstance) await initDB();
+  
+  const stores = ['courses', 'units', 'notes', 'flashcards', 'tasks', 'academicRecords', 'user'];
+  const data: any = {};
+  
+  for (const storeName of stores) {
+    data[storeName] = await getAll(storeName);
+  }
+  
+  return data;
+}
+
+export async function importDatabase(jsonData: string): Promise<void> {
+  if (!dbInstance) await initDB();
+  
+  const data = JSON.parse(jsonData);
+  const stores = ['courses', 'units', 'notes', 'flashcards', 'tasks', 'academicRecords', 'user'];
+  
+  // Clear all stores first
+  for (const storeName of stores) {
+    const items = await getAll(storeName);
+    for (const item of items) {
+      await remove(storeName, item.id);
+    }
+  }
+  
+  // Import new data
+  for (const storeName of stores) {
+    if (data[storeName] && Array.isArray(data[storeName])) {
+      for (const item of data[storeName]) {
+        if (item && item.id) {
+          await update(storeName, item);
+        }
+      }
+    }
+  }
+}
