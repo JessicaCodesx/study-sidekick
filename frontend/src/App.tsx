@@ -2,17 +2,12 @@ import { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AppProvider } from './context/AppContext';
-import { AuthProvider } from './context/AuthContext';
 import ThemeContext, { ThemeName } from './context/ThemeContext';
 import { initDB, getUserSettings } from './lib/db';
-import PageTransition from './components/common/PageTransition';
 
 // Layout and Pages
 import Navigation from './components/layout/Navigation';
 import Sidebar from './components/layout/Sidebar';
-import PageContainer from './components/layout/PageContainer';
-
-import LandingPage from './pages/LandingPage';
 import WelcomeModal from './components/common/WelcomeModal';
 
 import Dashboard from './pages/Dashboard';
@@ -27,12 +22,6 @@ import CourseGradesPage from './pages/CourseGradesPage';
 
 import './styles/courseColors.css';
 import './App.css';
-
-// Auth
-import SignIn from './components/auth/SignIn';
-import SignUp from './components/auth/SignUp';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import React from 'react';
 
 // Helper function to get theme classes
 function getThemeClasses(theme: ThemeName, darkMode: boolean): string {
@@ -222,57 +211,40 @@ function App() {
       setDarkMode(dark);
       localStorage.setItem('darkMode', String(dark));
     } }}>
-      <AuthProvider>
-        <AppProvider>
-          <HashRouter>
-            <div className={`h-screen w-screen flex flex-col 
-              transition-colors duration-300 overflow-hidden
-              ${getThemeClasses(theme, darkMode)}`}>
-
-              <Routes>
-                {/* Public Auth Routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/signin" element={<SignIn />} />
-                <Route path="/signup" element={<SignUp />} />
-
-                {/* Protected Routes */}
-                <Route path="/*" element={
-                  <ProtectedRoute>
-                    <>
-                      {/* Welcome Modal for first-time users */}
-                      <WelcomeModal
-                        isOpen={showWelcomeModal}
-                        onClose={handleCloseWelcomeModal}
-                      />
-                      <Navigation 
-                        isSidebarOpen={isSidebarOpen} 
-                        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                      />
-                      <div className="flex flex-1 overflow-hidden">
-                        <Sidebar isOpen={isSidebarOpen} />
-                        <main className={`flex-1 overflow-auto ${getMainBackgroundClass(theme, darkMode)}`}>
-                          <Routes>
-                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                            <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/courses" element={<CoursesPage />} />
-                            <Route path="/courses/:courseId/notes" element={<NotesPage />} />
-                            <Route path="/courses/:courseId/flashcards" element={<FlashcardsPage />} />
-                            <Route path="/courses/:courseId/grades" element={<CourseGradesPage />} />
-                            <Route path="/calendar" element={<CalendarPage />} />
-                            <Route path="/academic-records" element={<AcademicRecordsPage />} />
-                            <Route path="/settings" element={<SettingsPage />} />
-                            <Route path="*" element={<NotFoundPage />} />
-                          </Routes>
-                        </main>
-                      </div>
-                    </>
-                  </ProtectedRoute>
-                } />
-              </Routes>
+      <AppProvider>
+        <HashRouter>
+          <div className={`h-screen w-screen flex flex-col 
+            transition-colors duration-300 overflow-hidden
+            ${getThemeClasses(theme, darkMode)}`}>
+            {/* Welcome Modal for first-time users */}
+            <WelcomeModal
+              isOpen={showWelcomeModal}
+              onClose={handleCloseWelcomeModal}
+            />
+            <Navigation 
+              isSidebarOpen={isSidebarOpen} 
+              toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
+            <div className="flex flex-1 overflow-hidden">
+              <Sidebar isOpen={isSidebarOpen} />
+              <main className={`flex-1 overflow-auto ${getMainBackgroundClass(theme, darkMode)}`}>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/courses" element={<CoursesPage />} />
+                  <Route path="/courses/:courseId/notes" element={<NotesPage />} />
+                  <Route path="/courses/:courseId/flashcards" element={<FlashcardsPage />} />
+                  <Route path="/courses/:courseId/grades" element={<CourseGradesPage />} />
+                  <Route path="/calendar" element={<CalendarPage />} />
+                  <Route path="/academic-records" element={<AcademicRecordsPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </main>
             </div>
-          </HashRouter>
-        </AppProvider>
-      </AuthProvider>
+          </div>
+        </HashRouter>
+      </AppProvider>
     </ThemeContext.Provider>
   );
 }

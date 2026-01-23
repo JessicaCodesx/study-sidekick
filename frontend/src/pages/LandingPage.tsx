@@ -61,12 +61,9 @@ const LandingPage = () => {
               </div>
             </div>
             <div className="flex items-center">
-  <Link to="/signin" className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400">
-    Sign In
-  </Link>
-  <Link to="/signup" className="ml-4 px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-md shadow-sm">
-    Sign Up
-  </Link>
+              <Link to="/dashboard" className="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-md shadow-sm">
+                Get Started
+              </Link>
             </div>
           </div>
         </div>
@@ -94,7 +91,7 @@ const LandingPage = () => {
                   <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                     <div className="rounded-md shadow">
                     <Link
-  to="/signup"
+  to="/dashboard"
   className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700 md:py-4 md:text-lg md:px-10"
 >
   Get Started
@@ -223,15 +220,15 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             <span className="block">Ready to get started?</span>
-            <span className="block text-amber-100">Download now or sign up for free.</span>
+            <span className="block text-amber-100">Start organizing your studies today.</span>
           </h2>
           <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
             <div className="inline-flex rounded-md shadow">
             <Link
-  to="/signup"
+  to="/dashboard"
   className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-amber-600 bg-white hover:bg-amber-50"
 >
-  Sign up
+  Get Started
 </Link>
 
             </div>
